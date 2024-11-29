@@ -1,0 +1,59 @@
+<div class="container  mt-3" >
+    <!-- <h1>{{uid}}</h1> -->
+    <table class="table  table-bordered table-hover table-info">
+       
+        <thead >
+            <tr class="table-dark">
+                <td>Código</td>
+                <td>Nombre</td>
+                <td>Medidas</td>
+                <td>Localización</td>
+                <td>Cantidad</td>
+                <td>Apartado</td>
+                <td>Disponible</td>
+                <td>Actualizar</td>
+            </tr>
+        </thead>
+        <tbody> 
+               <tr>
+                    <td>
+                        <input type="number" class="inputNumber"  (input)="onCodigoInput($event)" placeholder="Id">
+                    </td>
+                    <td>
+                        <input type="text" class="inputText" (input)="onNombreInput($event)" placeholder="Nombre">
+                    </td>
+                    <td>
+                        <input type="text" class="inputText" (input)="onMedidaInput($event)" placeholder="Medidas">
+                    </td>
+                    <td>
+                        <input type="text" class="inputText" (input)="onLocalizacionInput($event)" placeholder="Localización">
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+               </tr>
+
+                <tr  *ngFor="let item of inventario">
+                    <td>{{item.id}}</td>
+                    <td>{{item.nombre}}</td>
+                    <td>{{item.medida}}</td>
+                    <td class="input">
+                        <input type="text" class="inputText" value={{item.localizacion}} name="flocalizacion">
+                    </td>
+                    <td class="input">
+                        <input type="number" class="inputNumber" value={{item.cantidad}} name="fcantidad">
+                    </td>
+                    <td class="input">
+                        <input type="number" class="inputNumber" value={{item.apartado}} name="fapartado">
+                    </td>
+                    <td class="input">
+                        <input type="number" class="inputNumber" value={{item.disponible}} name="fdisponible">
+                    </td>
+                    <td class="input">
+                        <button class="btn btn-primary btn-sm " (click)="actualizar($event)"><i class="fa-solid fa-circle-up"></i></button>
+                    </td>
+                </tr>
+        </tbody>
+    </table>    
+</div>
