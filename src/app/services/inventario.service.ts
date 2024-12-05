@@ -8,7 +8,7 @@ import { map, Observable } from 'rxjs';
 })
 export class OdooJsonRpcService {
 
-  private odooUrl = 'http://localhost:8069/jsonrpc'; // URL del endpoint JSON-RPC de Odoo
+  private odooUrl = 'http://dtmindustry.ddns.net:8069/jsonrpc'; // URL del endpoint JSON-RPC de Odoo
 
   constructor(private http: HttpClient) { }
 
