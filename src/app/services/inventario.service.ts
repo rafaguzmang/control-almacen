@@ -43,7 +43,7 @@ export class OdooJsonRpcService {
     );
   }
 
-  read(uid:number,domain:any):Observable<any>{
+  read(uid:number,domain:any,model:string,fields:any):Observable<any>{
     let method ='call';
     let params = {
             service: 'object',
@@ -52,10 +52,10 @@ export class OdooJsonRpcService {
               'backup',          // Base de datos
               uid,               // UID autenticado
               'admin',           // Contraseña
-              'dtm.diseno.almacen', // Nombre del modelo
+              model, // Nombre del modelo
               'search_read',     // Método a ejecutar
                 domain, // Dominio para filtrar registros
-                ['id','nombre','medida','localizacion','cantidad','apartado','disponible',],
+                fields,
                 0,    
                 10,
             ],
@@ -66,8 +66,8 @@ export class OdooJsonRpcService {
     );
   }  
 
-  update(uid:number,id:number,localizacion:string,cantidad:number,apartado:number,disponible:number,):Observable<any>{
-    console.log(uid,id,localizacion,cantidad,apartado,disponible)
+  update(uid:number,id:number,model:string,campos:any):Observable<any>{
+    // console.log(uid,id,localizacion,cantidad,apartado,disponible)
     let method ='call';
     let params = {
           service: 'object',
@@ -76,11 +76,10 @@ export class OdooJsonRpcService {
             "backup",     // Nombre de la base de datos
             uid,                          // ID del usuario que ejecuta la acción (Admin usualmente es 2)
             "admin",               // Contraseña del usuario
-            "dtm.diseno.almacen",        // Nombre del modelo (por ejemplo, 'res.partner')
+            model,        // Nombre del modelo (por ejemplo, 'res.partner')
             "write",                    // Método a ejecutar
             [id],
-            {'id':id,'localizacion':localizacion,'cantidad':cantidad,'apartado':apartado,'disponible':disponible,}
-        ] // Base de datos, usuario, contraseña, contexto
+            campos] // Base de datos, usuario, contraseña, contexto
         }
 
     return this.call(method, params).pipe(

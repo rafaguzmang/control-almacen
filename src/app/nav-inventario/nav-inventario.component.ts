@@ -20,7 +20,7 @@ constructor(private buscar:OdooJsonRpcService,private resultado:DatosService){
     const textfield = document.querySelector('#fname-buscar') as HTMLInputElement;
     this.buscar.authenticate().subscribe((uid: number) => {
       if(uid == 2){
-        this.buscar.read(uid,['nombre','like',textfield.value]).subscribe(data=>{
+        this.buscar.read(uid,['nombre','like',textfield.value],'dtm.diseno.almacen',['id','nombre','medida','localizacion','cantidad','apartado','disponible',]).subscribe(data=>{
           this.resultado.setInventario(data);
         });
       }
