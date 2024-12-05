@@ -12,36 +12,49 @@ import { DatosService } from '../services/datos.service';
 })
 export class InventarioComponent implements OnInit{
   inventario: any [] = [];
-  uid: number = 0;
+  // Variables para hacer los filtros
   private nombre:string = "";
   private medida:string = "";
   private localizacion:string = "";
 
+  emptyFields(){
+    this.seach([['id','!=',0]])
+  }
   onCodigoInput(event: Event): void {
     let input = event.target as HTMLInputElement;
-    this.update([['id','=',input.value]])
-
+    this.seach([['id','=',input.value]])
+    if (input.value==="0" && this.nombre == "" && this.medida=="" && this.localizacion == "" ){
+      this.emptyFields();
+    }
   }
 
   onNombreInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    console.log(`Valor ingresado: ${input.value}`);
+    // console.log(`Valor ingresado: ${input.value}`);
     this.nombre = input.value;
-    this.update([['nombre','like',this.nombre],['medida','like',this.medida],['localizacion','like',this.localizacion]]);
+    this.seach([['nombre','like',this.nombre],['medida','like',this.medida],['localizacion','like',this.localizacion]]);
+    if (this.nombre == "" && this.medida=="" && this.localizacion == "" ){
+      this.emptyFields();
+    }
   }
 
   onMedidaInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    console.log(`Valor ingresado: ${input.value}`);
+    // console.log(`Valor ingresado: ${input.value}`);
     this.medida = input.value;
-    this.update([['nombre','like',this.nombre],['medida','like',this.medida],['localizacion','like',this.localizacion]]);
+    this.seach([['nombre','like',this.nombre],['medida','like',this.medida],['localizacion','like',this.localizacion]]);
+    if (this.nombre == "" && this.medida=="" && this.localizacion == "" ){
+      this.emptyFields();
+    }
   }
 
   onLocalizacionInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    console.log(`Valor ingresado: ${input.value}`);
+    // console.log(`Valor ingresado: ${input.value}`);
     this.localizacion = input.value;
-    // this.update([['nombre','like',this.nombre],['medida','like',this.medida],['localizacion','like',this.localizacion]]);
+    if (this.nombre == "" && this.medida=="" && this.localizacion == "" ){
+      this.emptyFields();
+    }
   }
   
   constructor(private inventarioService:OdooJsonRpcService,
@@ -50,7 +63,7 @@ export class InventarioComponent implements OnInit{
   ngOnInit(): void {
     this.inventarioService.authenticate().subscribe((uid: number) => {
       if(uid == 2){
-        this.inventarioService.read(uid,[['id','!=',0]]).subscribe(data=>{
+        this.inventarioService.read(uid,[['id','!=',0]],'dtm.diseno.almacen',['id','nombre','medida','localizacion','cantidad','apartado','disponible',]).subscribe(data=>{
           this.inventarioDatos.setInventario(data);
           this.inventario = this.inventarioDatos.getInventario();
         });
@@ -59,7 +72,7 @@ export class InventarioComponent implements OnInit{
     
     this.inventarioDatos.inventario$.subscribe((data) => {
       this.inventario = data; // Actualiza la variable local cuando cambian los datos
-      console.log('Inventario actualizado:', this.inventario);
+      // console.log('Inventario actualizado:', this.inventario);
     });
   }
   
@@ -89,21 +102,21 @@ export class InventarioComponent implements OnInit{
     let cantidad = Number(cantidadHtml.value ?? 0);
     let apartado = Number(apartadoHtml.value ?? 0);
     let disponible = Number(disponibleHtmal.value ?? 0);
-    console.log(id,localizacion,cantidad,apartado,disponible);
+    // console.log(id,localizacion,cantidad,apartado,disponible);
 
     this.inventarioService.authenticate().subscribe((uid: number) => {
       if(uid == 2){
-        this.inventarioService.update(uid,id,localizacion,cantidad,apartado,disponible).subscribe(data=>{
-        console.log(data)        
+        this.inventarioService.update(uid,id,'dtm.diseno.almacen',{'localizacion':localizacion,'cantidad':cantidad,'apartado':apartado,'disponible':disponible}).subscribe(data=>{
+        // console.log(data)        
         });
       }
     });  
     
   }
 
-  update(dominio:any[]){
+  seach(dominio:any[]){
     this.inventarioService.authenticate().subscribe((uid: number) => {
-      this.inventarioService.read(uid,dominio).subscribe(data=>{
+      this.inventarioService.read(uid,dominio,'dtm.diseno.almacen',['id','nombre','medida','localizacion','cantidad','apartado','disponible',]).subscribe(data=>{
         this.inventarioDatos.setInventario(data);
         this.inventario = this.inventarioDatos.getInventario();
       });
@@ -111,7 +124,7 @@ export class InventarioComponent implements OnInit{
     });  
     this.inventarioDatos.inventario$.subscribe((data) => {
       this.inventario = data; // Actualiza la variable local cuando cambian los datos
-      console.log('Inventario actualizado:', this.inventario);
+      // console.log('Inventario actualizado:', this.inventario);
     });
   }
 }

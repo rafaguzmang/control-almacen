@@ -1,0 +1,48 @@
+<div class="container">
+    <table class="table  table-bordered table-hover table-primary">
+        <thead class="table-dark">
+           <tr>
+            <th>Orden</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Medida</th>
+            <th>Cantidad</th>
+            <th>Entregado</th>
+           </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <input type="number" class="inputText" (input)="onOrdenInput($event)" placeholder="Localización">
+                </td>
+                <td>                        
+                    <input type="number" class="inputNumber"  (input)="onCodigoInput($event)" placeholder="Id">
+                </td>
+                <td>
+                    <!-- <input type="text" class="inputText" (input)="onNombreInput($event)" placeholder="Nombre"> -->
+                </td>
+                <td>
+                    <!-- <input type="text" class="inputText" (input)="onMedidaInput($event)" placeholder="Medidas"> -->
+                </td>
+                <td></td>
+                <td></td>
+               
+           </tr>
+            @for (item of material; track item.numero){
+                
+                <tr>
+                    
+                    <td>{{item.orden}}</td>
+                    <td>{{item.codigo}}</td>
+                    <td>{{item.nombre}}</td>
+                    <td>{{item.medida}}</td>
+                    <td>{{item.cantidad}}</td>                
+                    <td class="entregado d-flex justify-content-center">
+                        <input type="number" value={{item.cantidad}} class="me-1" (input)="entregadoCantidad($event)" [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" >
+                        <button class="btn btn-success btn-sm " (click)="entregado($event)"  [hidden]="item.entregado"><i class="fa-solid fa-building-circle-arrow-right"></i></button>
+                    </td>                
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
