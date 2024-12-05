@@ -33,8 +33,7 @@
 
             ],
             "scripts": [              
-                "node_modules/bootstrap/dist/js/bootstrap.min.js",
-                "src/polyfills.ts"
+                "node_modules/bootstrap/dist/js/bootstrap.min.js"
 
           ],
             "server": "src/main.server.ts",
@@ -74,7 +73,7 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "control-almacen:build:production"
+              "buildTarget": "control-almacen:build:production"              
             },
             "development": {
               "buildTarget": "control-almacen:build:development"
