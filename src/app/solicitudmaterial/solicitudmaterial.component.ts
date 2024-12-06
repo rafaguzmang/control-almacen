@@ -148,12 +148,13 @@ export class SolicitudmaterialComponent implements OnInit{
     let material:any = [];
     this.solMat.authenticate().subscribe(uid => 
       this.solMat.read(uid,[['id','!=',0]],'dtm.proceso',['ot_number','materials_ids']).subscribe(data =>{
+        console.log(data);
         for(const items of data){
           for(const item of items.materials_ids){
             this.solMat.read(uid,[['id','=',item]],'dtm.materials.line',
             ['materials_list','nombre','medida', 'materials_cuantity',
             'materials_inventory', 'materials_required','entregado']).subscribe(info => {
-              // console.log(items.ot_number,info[0].materials_list[0],info[0].nombre,info[0].medida,info[0].materials_cuantity)
+              console.log(items.ot_number,info[0].materials_list[0],info[0].nombre,info[0].medida,info[0].materials_cuantity)
               material.push({'numero':num++,'orden':items.ot_number,'codigo':info[0].materials_list[0],'nombre':info[0].nombre,
                                   'medida':info[0].medida,'cantidad':info[0].materials_cuantity,'entregado':info[0].entregado})
             })
