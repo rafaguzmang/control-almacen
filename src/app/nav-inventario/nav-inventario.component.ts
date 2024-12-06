@@ -11,10 +11,19 @@ import { DatosService } from '../services/datos.service';
   styleUrls: ['./nav-inventario.component.css']
 })
 export class NavInventarioComponent {
-
-constructor(private buscar:OdooJsonRpcService,private resultado:DatosService){
-
-}
+  
+  constructor(private buscar:OdooJsonRpcService,private resultado:DatosService){
+    
+  }
+  
+  ordenBoton() {
+    this.resultado.setIsInordVisible(true)
+    this.resultado.setIsInventVisible(false);
+  }
+  inventBoton() {
+   this.resultado.setIsInventVisible(true);
+   this.resultado.setIsInordVisible(false);
+  }
 
   navBuscar() {
     const textfield = document.querySelector('#fname-buscar') as HTMLInputElement;
@@ -25,7 +34,5 @@ constructor(private buscar:OdooJsonRpcService,private resultado:DatosService){
         });
       }
     });
-
   }
-
 }

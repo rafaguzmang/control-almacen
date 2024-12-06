@@ -12,10 +12,17 @@ import { DatosService } from '../services/datos.service';
 })
 export class InventarioComponent implements OnInit{
   inventario: any [] = [];
+  isInventVisible:boolean = true;
   // Variables para hacer los filtros
   private nombre:string = "";
   private medida:string = "";
   private localizacion:string = "";
+
+  constructor(private inventarioService:OdooJsonRpcService,
+    private inventarioDatos:DatosService
+  ){}
+
+  
 
   emptyFields(){
     this.seach([['id','!=',0]])
@@ -57,9 +64,6 @@ export class InventarioComponent implements OnInit{
     }
   }
   
-  constructor(private inventarioService:OdooJsonRpcService,
-    private inventarioDatos:DatosService
-  ){}
   ngOnInit(): void {
     this.inventarioService.authenticate().subscribe((uid: number) => {
       if(uid == 2){
@@ -74,6 +78,10 @@ export class InventarioComponent implements OnInit{
       this.inventario = data; // Actualiza la variable local cuando cambian los datos
       // console.log('Inventario actualizado:', this.inventario);
     });
+
+    this.inventarioDatos.isInventVisible$.subscribe(visible=>{
+      this.isInventVisible = visible;      
+    })
   }
   
   actualizar(event:MouseEvent) {

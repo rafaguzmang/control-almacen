@@ -1,3 +1,29 @@
 /* .entregado{
     
 } */
+
+.input_number{
+    width: 15%;
+}
+
+.number_tabla{
+    width: 20%;
+}
+
+.input-tabla{
+    width: 100%;
+}
+
+.numero-tabla-h{
+    width: 8%;
+    
+}
+
+.nombre_tabla{
+    width: 30%;
+}
+
+.centrar_columna{
+    text-align: center;
+}
+

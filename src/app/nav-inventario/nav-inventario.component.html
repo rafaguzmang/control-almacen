@@ -4,14 +4,14 @@
             <a class="nav-link active" data-bs-toggle="pill" href="#"><i class="fa-solid fa-house-chimney"></i> </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" data-bs-toggle="pill" href="#">Inventario</a>
-        </li>
+          <a class="nav-link" data-bs-toggle="pill" href="#" (click)="ordenBoton()">Órdenes</a>
+        </li>       
         <li class="nav-item">
           <a class="nav-link" data-bs-toggle="pill" href="#">En tránsito</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" data-bs-toggle="pill" href="#">Órdenes</a>
-        </li>       
+          <a class="nav-link" data-bs-toggle="pill" href="#" (click)="inventBoton()">Inventario</a>
+        </li>
     </ul>
     <div action="/action_page.php" class="d-flex   me-3">
         <input type="text" id="fname-buscar" name="fname" placeholder="Buscar" class="form-control m2"><br>

@@ -10,12 +10,25 @@ export class DatosService {
 
   private materialSubjet = new BehaviorSubject<any[]>([]);
   material$ = this.materialSubjet.asObservable();
-  
+
+  private isInventVisible = new BehaviorSubject<boolean>(false);
+  isInventVisible$ = this.isInventVisible.asObservable();
+
+  private isInordVisible = new BehaviorSubject<boolean>(false);
+  isInordVisible$ = this.isInordVisible.asObservable();
+
+  setIsInordVisible(estado:boolean){
+    this.isInordVisible.next(estado);
+  }
+
+  getIsInordVisible():boolean{
+    return this.isInordVisible.getValue();
+  }
   
   setInventario(datos:[]){
     this.invetarioSubjet.next(datos);
-    // console.log(this.inventario);
   }
+
   getInventario(): any[] {
     return this.invetarioSubjet.getValue();
   }
@@ -26,4 +39,12 @@ export class DatosService {
   getMaterial(): any[] {
     return this.materialSubjet.getValue();
   }
+
+  setIsInventVisible(estado:boolean){
+     this.isInventVisible.next(estado);
+  }
+  getIsInventVisible():boolean{
+    return this.isInventVisible.getValue();
+  }
+
 }

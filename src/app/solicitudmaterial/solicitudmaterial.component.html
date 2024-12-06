@@ -1,9 +1,9 @@
 <div class="container">
-    <table class="table  table-bordered table-hover table-primary">
+    <table class="table  table-bordered table-hover table-primary" [hidden]="!isInordVisible">
         <thead class="table-dark">
            <tr>
-            <th>Orden</th>
-            <th>Código</th>
+            <th class="numero-tabla-h">Orden</th>
+            <th class="numero-tabla-h">Código</th>
             <th>Nombre</th>
             <th>Medida</th>
             <th>Cantidad</th>
@@ -13,10 +13,10 @@
         <tbody>
             <tr>
                 <td>
-                    <input type="number" class="inputText" (input)="onOrdenInput($event)" placeholder="Localización">
+                    <input type="number" class="input-tabla" (input)="onOrdenInput($event)" placeholder="Orden">
                 </td>
                 <td>                        
-                    <input type="number" class="inputNumber"  (input)="onCodigoInput($event)" placeholder="Id">
+                    <input type="number" class="input-tabla"  (input)="onCodigoInput($event)" placeholder="Id">
                 </td>
                 <td>
                     <!-- <input type="text" class="inputText" (input)="onNombreInput($event)" placeholder="Nombre"> -->
@@ -28,18 +28,19 @@
                 <td></td>
                
            </tr>
-            @for (item of material; track item.numero){
-                
-                <tr>
-                    
+            @for (item of material; track item.numero){                
+                <tr>                    
                     <td>{{item.orden}}</td>
                     <td>{{item.codigo}}</td>
-                    <td>{{item.nombre}}</td>
-                    <td>{{item.medida}}</td>
-                    <td>{{item.cantidad}}</td>                
-                    <td class="entregado d-flex justify-content-center">
-                        <input type="number" value={{item.cantidad}} class="me-1" (input)="entregadoCantidad($event)" [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" >
-                        <button class="btn btn-success btn-sm " (click)="entregado($event)"  [hidden]="item.entregado"><i class="fa-solid fa-building-circle-arrow-right"></i></button>
+                    <td class="nombre_tabla">{{item.nombre}}</td>
+                    <td class="number_tabla">{{item.medida}}</td>
+                    <td class="centrar_columna">{{item.cantidad}}</td>                
+                    <td class="entregado">
+                        <div class="input-tabla">
+                            <input type="number" value={{item.cantidad}} class="me-1 input_number" (input)="entregadoCantidad($event)" [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" >
+                            <input type="text"  class="me-1 input_text" [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" placeholder="Recibe">
+                            <button class="btn btn-success btn-sm " (click)="entregado($event)"  [hidden]="item.entregado"><i class="fa-solid fa-building-circle-arrow-right"></i></button>
+                        </div>
                     </td>                
                 </tr>
             }
