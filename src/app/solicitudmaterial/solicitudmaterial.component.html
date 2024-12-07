@@ -38,7 +38,7 @@
                     <td class="entregado">
                         <div class="input-tabla">
                             <input type="number" value={{item.cantidad}} class="me-1 input_number" (input)="entregadoCantidad($event)" [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" >
-                            <input type="text"  class="me-1 input_text" [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" placeholder="Recibe">
+                            <input type="text"  class="me-1 input_text" [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" placeholder="Recibe" value="{{item.recibe}}">
                             <button class="btn btn-success btn-sm " (click)="entregado($event)"  [hidden]="item.entregado"><i class="fa-solid fa-building-circle-arrow-right"></i></button>
                         </div>
                     </td>                

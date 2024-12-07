@@ -30,22 +30,25 @@ export class SolicitudmaterialComponent implements OnInit{
     }else{
       propiedades = propiedades.parentElement?.children[0] as HTMLInputElement;
     }
-    let elementoOrden = propiedades.parentElement?.parentElement?.children[0] as HTMLInputElement;
-    let elementoCodigo = propiedades.parentElement?.parentElement?.children[1] as HTMLInputElement;
-    let elementoCantidad = propiedades.parentElement?.parentElement?.children[4] as HTMLInputElement;
-    let elementoEntregado = propiedades.parentElement?.parentElement?.children[5].children[0] as HTMLInputElement;
+    let elementoOrden = propiedades.parentElement?.parentElement?.parentElement?.children[0] as HTMLInputElement;
+    let elementoCodigo = propiedades.parentElement?.parentElement?.parentElement?.children[1] as HTMLInputElement;
+    let elementoCantidad = propiedades.parentElement?.parentElement?.parentElement?.children[4] as HTMLInputElement;
+    let elementoEntregado = propiedades.parentElement?.parentElement?.parentElement?.children[5].children[0].children[0] as HTMLInputElement;
+    let elementoRecibe = propiedades.parentElement?.parentElement?.parentElement?.children[5].children[0].children[1] as HTMLInputElement;
+    console.log(elementoEntregado);
     let orden = Number(elementoOrden.textContent ?? 0);
     let codigo = Number(elementoCodigo.textContent ?? 0);
     let cantidad = Number(elementoCantidad.textContent ?? 0);
     let entregado = Number(elementoEntregado.value ?? 0);
-    // console.log(orden,codigo,cantidad,entregado);    
+    let recibe =  elementoRecibe.value.toString();
+    console.log(orden,codigo,cantidad,entregado,recibe);    
     this.solMat.authenticate().subscribe((uid: number) => {
       if(uid == 2){
         this.solMat.read(uid,[['ot_number','=',orden]],'dtm.odt',['id']).subscribe(ordenData =>{ 
           // console.log(ordenData[0].id);
           this.solMat.read(uid,[['model_id','=',ordenData[0].id],['materials_list','=',codigo]],'dtm.materials.line',['id','materials_availabe']).subscribe(ordenId =>{
             // console.log(ordenId[0].id,ordenId[0].materials_availabe);          
-            this.solMat.update(uid,ordenId[0].id,'dtm.materials.line',{'entregado':true}).subscribe();
+            this.solMat.update(uid,ordenId[0].id,'dtm.materials.line',{'entregado':true,'recibe':recibe}).subscribe();
             this.solMat.read(uid,[['id','=',codigo]],'dtm.diseno.almacen',['apartado']).subscribe(apartado =>{
               // console.log(apartado[0].apartado, ordenId[0].materials_availabe)
               let apartadoMaterial = apartado[0].apartado - ordenId[0].materials_availabe;
@@ -133,12 +136,13 @@ export class SolicitudmaterialComponent implements OnInit{
           for(const item of items.materials_ids){
             this.solMat.read(uid,[['id','=',item]],'dtm.materials.line',
             ['materials_list','nombre','medida', 'materials_cuantity',
-            'materials_inventory', 'materials_required','entregado']).subscribe(info => {
-              // console.log(items.ot_number,info[0].materials_list[0],info[0].nombre,info[0].medida,info[0].materials_cuantity)
+            'materials_inventory', 'materials_required','entregado','recibe']).subscribe(info => {
+              console.log(info[0].recibe);
               material.push({'numero':num++,'orden':items.ot_number,'codigo':info[0].materials_list[0],'nombre':info[0].nombre,
-                                  'medida':info[0].medida,'cantidad':info[0].materials_cuantity,'entregado':info[0].entregado})
+                                  'medida':info[0].medida,'cantidad':info[0].materials_cuantity,'entregado':info[0].entregado,
+                                'recibe':info[0].recibe===false?'':info[0].recibe})
             })
-          }          
+          }           
         } 
         this.dataMat.setMaterial(material);
         this.material = this.dataMat.getMaterial();       
@@ -156,13 +160,14 @@ export class SolicitudmaterialComponent implements OnInit{
           for(const item of items.materials_ids){
             this.solMat.read(uid,[['id','=',item]],'dtm.materials.line',
             ['materials_list','nombre','medida', 'materials_cuantity',
-            'materials_inventory', 'materials_required','entregado']).subscribe(info => {
+            'materials_inventory', 'materials_required','entregado','recibe']).subscribe(info => {
               // console.log(items.ot_number,info[0].materials_list[0],info[0].nombre,info[0].medida,info[0].materials_cuantity)
               material.push({'numero':num++,'orden':items.ot_number,'codigo':info[0].materials_list[0],'nombre':info[0].nombre,
-                                  'medida':info[0].medida,'cantidad':info[0].materials_cuantity,'entregado':info[0].entregado})
+                                  'medida':info[0].medida,'cantidad':info[0].materials_cuantity,'entregado':info[0].entregado,
+                                'recibe':info[0].recibe === false ? '' : info[0].recibe})
             })
           }          
-        } 
+        }   
         this.dataMat.setMaterial(material);
         this.material = this.dataMat.getMaterial();
              
