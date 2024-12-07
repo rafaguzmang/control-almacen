@@ -67,14 +67,15 @@ export class SolicitudmaterialComponent implements OnInit{
   // Restringe el valor a los limites de la cantidad solicitada
   entregadoCantidad(event: Event){
     let restar = event.target as HTMLInputElement;
-    let cantidadElement = restar.parentElement?.parentElement?.children[4] as HTMLElement;
+    let cantidadElement = restar.parentElement?.parentElement?.parentElement?.children[4] as HTMLElement;
+    console.log(restar,cantidadElement);
     if(parseInt(restar.value) < 0){
       restar.value = '0';
     }
     if(Number(cantidadElement.textContent??0) < parseInt(restar.value)  ){
       restar.value = cantidadElement.textContent??'0';
     }
-    // console.log(cantidadElement.textContent);
+    console.log(cantidadElement.textContent);
   }
 
   onOrdenInput(event: Event) {
