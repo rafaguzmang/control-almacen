@@ -12,17 +12,24 @@ import { DatosService } from '../services/datos.service';
 })
 export class NavInventarioComponent {
   
-  constructor(private buscar:OdooJsonRpcService,private resultado:DatosService){
-    
+  constructor(private buscar:OdooJsonRpcService,private resultado:DatosService){}
+
+  controlBoton() {
+    this.resultado.setIsContentVisible(true);
+    this.resultado.setIsInordVisible(false);
+    this.resultado.setIsInventVisible(false);
+ 
   }
   
   ordenBoton() {
     this.resultado.setIsInordVisible(true)
     this.resultado.setIsInventVisible(false);
+    this.resultado.setIsContentVisible(false);
   }
   inventBoton() {
    this.resultado.setIsInventVisible(true);
    this.resultado.setIsInordVisible(false);
+   this.resultado.setIsContentVisible(false);
   }
 
   navBuscar() {

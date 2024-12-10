@@ -21,6 +21,7 @@ export class SolicitudmaterialComponent implements OnInit{
   
   constructor(private solMat:OdooJsonRpcService, private dataMat:DatosService){}
   
+  // Botón para entregar el material a producción
   entregado(event: Event ):void {
     let propiedades = event.target as HTMLInputElement;    
     // console.log(propiedades.parentElement?.nodeName,propiedades.parentNode?.nodeName);
@@ -68,14 +69,14 @@ export class SolicitudmaterialComponent implements OnInit{
   entregadoCantidad(event: Event){
     let restar = event.target as HTMLInputElement;
     let cantidadElement = restar.parentElement?.parentElement?.parentElement?.children[4] as HTMLElement;
-    console.log(restar,cantidadElement);
+    // console.log(restar,cantidadElement);
     if(parseInt(restar.value) < 0){
       restar.value = '0';
     }
     if(Number(cantidadElement.textContent??0) < parseInt(restar.value)  ){
       restar.value = cantidadElement.textContent??'0';
     }
-    console.log(cantidadElement.textContent);
+    // console.log(cantidadElement.textContent);
   }
 
   onOrdenInput(event: Event) {
@@ -159,9 +160,10 @@ export class SolicitudmaterialComponent implements OnInit{
         // console.log(data);
         for(const items of data){
           for(const item of items.materials_ids){
+            // console.log(item);
             this.solMat.read(uid,[['id','=',item]],'dtm.materials.line',
             ['materials_list','nombre','medida', 'materials_cuantity',
-            'materials_inventory', 'materials_required','entregado','recibe']).subscribe(info => {
+            'materials_inventory', 'materials_required','entregado']).subscribe(info => {
               // console.log(items.ot_number,info[0].materials_list[0],info[0].nombre,info[0].medida,info[0].materials_cuantity)
               material.push({'numero':num++,'orden':items.ot_number,'codigo':info[0].materials_list[0],'nombre':info[0].nombre,
                                   'medida':info[0].medida,'cantidad':info[0].materials_cuantity,'entregado':info[0].entregado,

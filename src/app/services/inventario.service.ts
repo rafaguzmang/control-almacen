@@ -87,4 +87,42 @@ export class OdooJsonRpcService {
     );
   }
 
+  create(uid:number,model:string,task_args:any):Observable<any>{
+    // console.log(uid,id,localizacion,cantidad,apartado,disponible)
+    let method ='call';
+    let params = {
+          service: 'object',
+          method: 'execute',
+          args:  [
+            "backup",     // Nombre de la base de datos
+            uid,                          // ID del usuario que ejecuta la acción (Admin usualmente es 2)
+            "admin",               // Contraseña del usuario
+            model,        // Nombre del modelo (por ejemplo, 'res.partner')
+            "create",                    // Método a ejecutar
+            task_args]
+        }
+    return this.call(method, params).pipe(
+      map((response: any) => response.result) // Transforma la respuesta y retorna solo `result`
+    );
+  }
+  
+  delete(uid:number,model:string,idUnlik:any):Observable<any>{
+    // console.log(uid,id,localizacion,cantidad,apartado,disponible)
+    let method ='call';
+    let params = {
+          service: 'object',
+          method: 'execute',
+          args:  [
+            "backup",     // Nombre de la base de datos
+            uid,                          // ID del usuario que ejecuta la acción (Admin usualmente es 2)
+            "admin",               // Contraseña del usuario
+            model,        // Nombre del modelo (por ejemplo, 'res.partner')
+            "unlink",                    // Método a ejecutar
+            idUnlik]
+        }
+    return this.call(method, params).pipe(
+      map((response: any) => response.result) // Transforma la respuesta y retorna solo `result`
+    );
+  }
+
 }

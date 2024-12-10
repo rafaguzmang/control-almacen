@@ -3,11 +3,12 @@ import { RouterOutlet } from '@angular/router';
 import { InventarioComponent } from "./inventario/inventario.component";
 import { NavInventarioComponent } from "./nav-inventario/nav-inventario.component";
 import { SolicitudmaterialComponent } from "./solicitudmaterial/solicitudmaterial.component";
+import { EntransitoComponent } from "./entransito/entransito.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, InventarioComponent, NavInventarioComponent, SolicitudmaterialComponent],
+  imports: [RouterOutlet, InventarioComponent, NavInventarioComponent, SolicitudmaterialComponent, EntransitoComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

@@ -1,0 +1,40 @@
+<section>
+    <table class="table table-success table-striped" [hidden]="!isVisible">
+        <thead >
+            <tr class="table-dark">
+                <td>Orden</td>
+                <td>Proveedor</td>
+                <td>Código</td>
+                <td class="input-descripcion">Descripción</td>
+                <td>Fecha Estimada</td>
+                <td>Cantidad</td>
+                <td class="input-number">C.Recibida</td>
+                <td>Notas</td>
+                <td>Recibir</td>
+            </tr>
+        </thead>
+        <tbody>
+            @for (dato of datos; track dato.id ){
+
+                <tr>
+                    <td>{{dato.orden_trabajo===false?'':dato.orden_trabajo}}</td>
+                    <td>{{dato.proveedor}}</td>
+                    <td>{{dato.codigo}}</td>
+                    <td>{{dato.descripcion}}</td>
+                    <td>{{dato.fecha_recepcion}}</td>
+                    <td>{{dato.cantidad}}</td>
+                    <td>
+                        <input type="number" class="input-number-in" value="{{dato.cantidad}}" min="0">
+                    </td>
+                    <td>
+                        <input type="text" placeholder="Notas" >
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-success " (click)="materialDone($event)"><i class="fa-solid fa-truck-ramp-box"></i></button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    
+    </table>
+</section>
