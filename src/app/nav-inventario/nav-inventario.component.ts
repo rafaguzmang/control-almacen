@@ -11,14 +11,17 @@ import { DatosService } from '../services/datos.service';
   styleUrls: ['./nav-inventario.component.css']
 })
 export class NavInventarioComponent {
+homeBoton() {
+throw new Error('Method not implemented.');
+}
   
   constructor(private buscar:OdooJsonRpcService,private resultado:DatosService){}
+  
 
   controlBoton() {
     this.resultado.setIsContentVisible(true);
     this.resultado.setIsInordVisible(false);
-    this.resultado.setIsInventVisible(false);
- 
+    this.resultado.setIsInventVisible(false); 
   }
   
   ordenBoton() {

@@ -4,11 +4,12 @@ import { InventarioComponent } from "./inventario/inventario.component";
 import { NavInventarioComponent } from "./nav-inventario/nav-inventario.component";
 import { SolicitudmaterialComponent } from "./solicitudmaterial/solicitudmaterial.component";
 import { EntransitoComponent } from "./entransito/entransito.component";
+import { HomeComponent } from "./home/home.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, InventarioComponent, NavInventarioComponent, SolicitudmaterialComponent, EntransitoComponent],
+  imports: [InventarioComponent, NavInventarioComponent, SolicitudmaterialComponent, EntransitoComponent, HomeComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
