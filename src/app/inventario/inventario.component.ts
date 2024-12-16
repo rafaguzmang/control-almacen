@@ -65,23 +65,24 @@ export class InventarioComponent implements OnInit{
   }
   
   ngOnInit(): void {
-    this.inventarioService.authenticate().subscribe((uid: number) => {
-      if(uid == 2){
-        this.inventarioService.read(uid,[['id','!=',0]],'dtm.diseno.almacen',['id','nombre','medida','localizacion','cantidad','apartado','disponible',]).subscribe(data=>{
-          this.inventarioDatos.setInventario(data);
-          this.inventario = this.inventarioDatos.getInventario();
-        });
-      }
-    });  
+    this.inventarioDatos.isInventVisible$.subscribe(visible=>{
+      this.isInventVisible = visible;   
+      this.inventarioService.authenticate().subscribe((uid: number) => {
+        if(uid == 2){
+          this.inventarioService.read(uid,[['id','!=',0]],'dtm.diseno.almacen',['id','nombre','medida','localizacion','cantidad','apartado','disponible',]).subscribe(data=>{
+            this.inventarioDatos.setInventario(data);
+            this.inventario = this.inventarioDatos.getInventario();
+          });
+        }
+      });   
+    })
+      
     
     this.inventarioDatos.inventario$.subscribe((data) => {
       this.inventario = data; // Actualiza la variable local cuando cambian los datos
       // console.log('Inventario actualizado:', this.inventario);
     });
 
-    this.inventarioDatos.isInventVisible$.subscribe(visible=>{
-      this.isInventVisible = visible;      
-    })
   }
   
   actualizar(event:MouseEvent) {
