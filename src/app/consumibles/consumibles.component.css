@@ -1,0 +1,16 @@
+.entregado{
+    display: flex;    
+}
+
+button{
+    margin-left: 3px;
+}
+
+tr.highlight-red{
+    background-color: #f2091d !important;
+}
+
+
+.highlight-yellow{
+    background-color: #f2bb08;
+}

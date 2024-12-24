@@ -1,8 +1,11 @@
 <nav class="navbar navbar-expand-sm bg-light justify-content-between mb-3">
-    <ul class="nav nav-pills ms-3" role="tablist">
+    <ul class="nav nav-pills ms-3" role="tablist">       
         <li class="nav-item">
             <a class="nav-link active" data-bs-toggle="pill" href="#" (click)="homeBoton()"><i class="fa-solid fa-house-chimney"></i> </a>
         </li>
+        <li class="nav-item" >  
+          <a class="nav-link" data-bs-toggle="pill" href="#" (click)="consumiblesBoton()" [class.bg-danger]="cantCero" [class.bg-warning]="cantMinItem" >Consumibles</a>
+        </li>       
         <li class="nav-item">
           <a class="nav-link" data-bs-toggle="pill" href="#" (click)="ordenBoton()">Órdenes</a>
         </li>       
@@ -13,10 +16,10 @@
           <a class="nav-link" data-bs-toggle="pill" href="#" (click)="inventBoton()">Inventario</a>
         </li>
     </ul>
-    <div action="/action_page.php" class="d-flex   me-3">
+    <!-- <div action="/action_page.php" class="d-flex   me-3">
         <input type="text" id="fname-buscar" name="fname" placeholder="Buscar" class="form-control m2"><br>
         <button class="btn btn-primary mx-2" (click)="navBuscar()"  >Buscar</button>
-    </div> 
+    </div>  -->
   
   </nav>
 

@@ -5,6 +5,9 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class DatosService {
+ 
+  
+  
   private invetarioSubjet = new BehaviorSubject<any[]>([]);
   inventario$ = this.invetarioSubjet.asObservable();
 
@@ -13,6 +16,9 @@ export class DatosService {
 
   private controlEntradasSubjet = new BehaviorSubject<any[]>([]);
   controlEntradas$ = this.controlEntradasSubjet.asObservable();
+
+  private consumiblesSubjet = new BehaviorSubject<any[]>([]);
+  consumibles$ = this.consumiblesSubjet.asObservable();
 
   private isInventVisible = new BehaviorSubject<boolean>(false);
   isInventVisible$ = this.isInventVisible.asObservable();
@@ -23,6 +29,31 @@ export class DatosService {
   private isContentVisible = new BehaviorSubject<boolean>(false);
   isContentVisible$ = this.isContentVisible.asObservable();
 
+  private isConsumibleVisible = new BehaviorSubject<boolean>(false);
+  isConsumibleVisible$ = this.isConsumibleVisible.asObservable();
+
+  //Indicador si hay items en consumibles con valores de minimos o cero
+  private cantMinItem = new BehaviorSubject<boolean>(false);
+  cantMinItem$ = this.cantMinItem.asObservable();
+  private cantCero = new BehaviorSubject<boolean>(false);
+  cantCero$ = this.cantCero.asObservable();
+
+  
+  setItemCero(dato: boolean) {
+    this.cantCero.next(dato)
+  }
+
+  getItemCero():boolean{
+    return this.cantCero.getValue();
+  }
+  
+  setItemMin(dato: boolean) {
+    this.cantMinItem.next(dato)
+  }
+
+  getItemMin():boolean{
+    return this.cantMinItem.getValue();
+  }
   
   setControlEntradas(datos:[]){
     this.controlEntradasSubjet.next(datos);
@@ -43,8 +74,18 @@ export class DatosService {
   setMaterial(datos:[]){
     this.materialSubjet.next(datos);
   }
+  
   getMaterial(): any[] {
     return this.materialSubjet.getValue();
+  }
+
+  setConsumibles(datos:[]){
+    this.consumiblesSubjet.next(datos)
+  }
+
+  
+  getConsumibles():any{
+    return this.consumiblesSubjet.getValue();
   }
   
   setIsInventVisible(estado:boolean){
@@ -69,6 +110,15 @@ export class DatosService {
   getIsContentVisible():boolean{
     return this.isContentVisible.getValue();
   }
+  
+  setIsConsumibleVisible(estado:boolean){
+    this.isConsumibleVisible.next(estado);
+  }
+
+  getIsConsumibleVisible():boolean{
+    return this.isConsumibleVisible.getValue();
+  }
+  
 
 
 }

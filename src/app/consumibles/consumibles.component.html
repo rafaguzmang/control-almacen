@@ -1,0 +1,48 @@
+<section>
+    <div class="container-fluid">
+        <table class="table table-success table-striped " [hidden]="!isVisible" >
+            <thead >
+                <tr >
+                    <td>Código</td>
+                    <td>Nombre</td>
+                    <td>Caracteristicas</td>
+                    <td>Cantidad</td>
+                    <td>Mínimo</td>
+                    <td>Localización</td>
+                    <td>Entregado</td>                    
+                    <td>Recibe</td>                    
+                    <td>Notas</td>                    
+                </tr>
+            </thead>
+            <tbody>
+                @for (dato of consumibles; track dato.id ){    
+                    <tr [class.table-danger]="dato.cantidad===0" [class.table-warning]="dato.cantidad<=dato.minimo">
+                        <td>{{dato.codigo}}</td>
+                        <td>{{dato.nombre}}</td>
+                        <td>{{dato.caracteristicas===false?'':dato.caracteristicas}}</td>
+                        <td>{{dato.cantidad}}</td>
+                        <td>
+                            <input type="number" [value]="dato.minimo">
+                        </td>
+                        <td>
+                            <input type="text" [value]="dato.localizacion==false?'':dato.localizacion">
+                        </td>
+                        <td >
+                            <div class="entregado">
+                                <input type="number" min="0">
+                                <button class="btn btn-primary btn-sm " (click)="descontar($event)" ><i class="fa-solid fa-square-check"></i></button>
+                            </div>
+                        </td>                    
+                        <td>
+                            <input type="text" >
+                        </td>                        
+                        <td>
+                            <input type="text" >
+                        </td>    
+                    </tr>
+                }
+            </tbody>
+        
+        </table>
+    </div>
+</section>

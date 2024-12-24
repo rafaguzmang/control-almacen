@@ -5,11 +5,12 @@ import { NavInventarioComponent } from "./nav-inventario/nav-inventario.componen
 import { SolicitudmaterialComponent } from "./solicitudmaterial/solicitudmaterial.component";
 import { EntransitoComponent } from "./entransito/entransito.component";
 import { HomeComponent } from "./home/home.component";
+import { ConsumiblesComponent } from "./consumibles/consumibles.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [InventarioComponent, NavInventarioComponent, SolicitudmaterialComponent, EntransitoComponent, HomeComponent],
+  imports: [InventarioComponent, NavInventarioComponent, SolicitudmaterialComponent, EntransitoComponent, HomeComponent, ConsumiblesComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
