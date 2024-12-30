@@ -63,20 +63,21 @@ export class InventarioComponent implements OnInit{
       this.emptyFields();
     }
   }
-  
+  fetchInventario(){
+    this.inventarioService.authenticate().subscribe((uid: number) => {
+      if(uid == 2){
+        this.inventarioService.read(uid,[['id','!=',0]],'dtm.diseno.almacen',['id','nombre','medida','localizacion','cantidad','apartado','disponible',],10).subscribe(data=>{
+          this.inventarioDatos.setInventario(data);
+          this.inventario = this.inventarioDatos.getInventario();
+        });
+      }
+    });   
+  }
   ngOnInit(): void {
     this.inventarioDatos.isInventVisible$.subscribe(visible=>{
       this.isInventVisible = visible;   
-      this.inventarioService.authenticate().subscribe((uid: number) => {
-        if(uid == 2){
-          this.inventarioService.read(uid,[['id','!=',0]],'dtm.diseno.almacen',['id','nombre','medida','localizacion','cantidad','apartado','disponible',]).subscribe(data=>{
-            this.inventarioDatos.setInventario(data);
-            this.inventario = this.inventarioDatos.getInventario();
-          });
-        }
-      });   
+      this.fetchInventario();
     })
-      
     
     this.inventarioDatos.inventario$.subscribe((data) => {
       this.inventario = data; // Actualiza la variable local cuando cambian los datos
@@ -125,7 +126,7 @@ export class InventarioComponent implements OnInit{
 
   seach(dominio:any[]){
     this.inventarioService.authenticate().subscribe((uid: number) => {
-      this.inventarioService.read(uid,dominio,'dtm.diseno.almacen',['id','nombre','medida','localizacion','cantidad','apartado','disponible',]).subscribe(data=>{
+      this.inventarioService.read(uid,dominio,'dtm.diseno.almacen',['id','nombre','medida','localizacion','cantidad','apartado','disponible',],10).subscribe(data=>{
         this.inventarioDatos.setInventario(data);
         this.inventario = this.inventarioDatos.getInventario();
       });

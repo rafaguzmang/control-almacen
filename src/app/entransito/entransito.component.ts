@@ -49,19 +49,19 @@ export class EntransitoComponent implements OnInit{
       this.odooConsulta.read(uid,[['orden_trabajo','=',datos.orden_trabajo===''?false:datos.orden_trabajo],
         ['proveedor','=',datos.proveedor],['codigo','=',datos.codigo],['descripcion','=',datos.descripcion],
         ['cantidad','=',parseInt(cantidad.value)]],
-        'dtm.control.entradas',['id']).subscribe(unlink=>{
+        'dtm.control.entradas',['id'],20).subscribe(unlink=>{
         // console.log(unlink[0].id);
         this.odooConsulta.delete(uid,'dtm.control.entradas',[unlink[0].id]).subscribe(del=>{
           // console.log(del);
         })
         this.odooConsulta.read(uid,[['codigo','=',datos.codigo],['nombre','=',datos.descripcion],['cantidad','=',datos.cantidad],['proveedor','=',datos.proveedor]]
-          ,'dtm.compras.realizado',['id']).subscribe(idUp=>{
+          ,'dtm.compras.realizado',['id'],20).subscribe(idUp=>{
             // console.log(idUp[0].id)
             this.odooConsulta.update(uid,idUp[0].id,'dtm.compras.realizado',{'cantidad_almacen':parseInt(datos.cantidad),'comprado':'Recibido'}).subscribe(result=>{
               // console.log(result)
             })
             this.odooConsulta.read(uid,[['id','!=','0']],'dtm.control.entradas',['id','orden_trabajo', 'proveedor','codigo','descripcion',
-              'cantidad','fecha_recepcion','fecha_real','factura']).subscribe(datos=>{
+              'cantidad','fecha_recepcion','fecha_real','factura'],20).subscribe(datos=>{
                 this.datosService.setControlEntradas(datos);
             })
         })
@@ -94,7 +94,7 @@ export class EntransitoComponent implements OnInit{
       this.isVisible = estado;
       this.odooConsulta.authenticate().subscribe(uid =>{
         this.odooConsulta.read(uid,[['id','!=','0']],'dtm.control.entradas',['id','orden_trabajo', 'proveedor','codigo','descripcion',
-          'cantidad','fecha_recepcion','fecha_real','factura']).subscribe(datos =>{
+          'cantidad','fecha_recepcion','fecha_real','factura'],20).subscribe(datos =>{
             this.datosService.setControlEntradas(datos);
           })
         });      
@@ -107,10 +107,10 @@ export class EntransitoComponent implements OnInit{
 
   ordenUpdate(uid:number,orden_trabajo:number,codigo:number,cantidad:number):void{
 
-    this.odooConsulta.read(uid,[['ot_number','=',orden_trabajo]],"dtm.odt",['id']).subscribe(result => {
+    this.odooConsulta.read(uid,[['ot_number','=',orden_trabajo]],"dtm.odt",['id'],20).subscribe(result => {
         if(result[0]){//Inserta el material solicitado a la orden correspondiente y actualiza el inventario
           this.odooConsulta.read(uid,[['model_id','=',parseInt(result[0].id)],['materials_list.id','=',codigo]],'dtm.materials.line',
-          ['id','materials_required','materials_availabe']).subscribe(modelId =>{
+          ['id','materials_required','materials_availabe'],20).subscribe(modelId =>{
             //Resta el material requerido del material solicitado
             //Material de la orden (puede ser solicitado en varias ordenes)
             // console.log('modelId',modelId)
@@ -118,7 +118,7 @@ export class EntransitoComponent implements OnInit{
             this.odooConsulta.update(uid,modelId[0].id,'dtm.materials.line',              
               {'materials_required':cantidad>=modelId[0].materials_required?0:modelId[0].materials_required,'materials_availabe':modelId[0].materials_availabe + modelId[0].materials_required }).subscribe(update=>{
                 //Material del inventario (único)
-                this.odooConsulta.read(uid,[['id','=',codigo]],'dtm.diseno.almacen',['cantidad','apartado','disponible']).subscribe(stock=>{
+                this.odooConsulta.read(uid,[['id','=',codigo]],'dtm.diseno.almacen',['cantidad','apartado','disponible'],20).subscribe(stock=>{
                   const stockNew = stock[0].cantidad + cantidad;
                   const apartadoNew = stock[0].apartado + requerido;
                   const dispNew = stockNew - apartadoNew;
@@ -131,7 +131,7 @@ export class EntransitoComponent implements OnInit{
           })          
         }
         else{ // De no ser una orden de trabajo agrega la cantidad al stock del almacén
-         this.odooConsulta.read(uid,[['id','=',codigo]],'dtm.diseno.almacen',['cantidad']).subscribe(stock=>{
+         this.odooConsulta.read(uid,[['id','=',codigo]],'dtm.diseno.almacen',['cantidad'],20).subscribe(stock=>{
           this.odooConsulta.update(uid,codigo,'dtm.diseno.almacen',{'cantidad':stock[0].cantidad + cantidad}).subscribe(update=>{
           })
          })

@@ -43,7 +43,7 @@ export class OdooJsonRpcService {
     );
   }
 
-  read(uid:number,domain:any,model:string,fields:any):Observable<any>{
+  read(uid:number,domain:any,model:string,fields:any,maxlim:number):Observable<any>{
     let method ='call';
     let params = {
             service: 'object',
@@ -57,7 +57,7 @@ export class OdooJsonRpcService {
                 domain, // Dominio para filtrar registros
                 fields,
                 0,    
-                10,
+                maxlim,
             ],
           }
 

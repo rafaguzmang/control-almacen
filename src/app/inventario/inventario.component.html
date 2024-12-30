@@ -40,7 +40,7 @@
                         <tr>
                             <td>{{item.id}}</td>
                             <td>{{item.nombre}}</td>
-                            <td>{{item.medida}}</td>
+                            <td>{{item.medida==false?'':item.medida}}</td>
                             <td class="input">
                                 <input type="text" class="inputText" value={{item.localizacion}} name="flocalizacion">
                             </td>

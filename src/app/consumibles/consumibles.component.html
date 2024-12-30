@@ -5,10 +5,9 @@
                 <tr >
                     <td>Código</td>
                     <td>Nombre</td>
-                    <td>Caracteristicas</td>
+                    <td class="medida_head">Medida</td>
+                    <td class="minimo_head">Mínimo</td>
                     <td>Cantidad</td>
-                    <td>Mínimo</td>
-                    <td>Localización</td>
                     <td>Entregado</td>                    
                     <td>Recibe</td>                    
                     <td>Notas</td>                    
@@ -17,20 +16,19 @@
             <tbody>
                 @for (dato of consumibles; track dato.id ){    
                     <tr [class.table-danger]="dato.cantidad===0" [class.table-warning]="dato.cantidad<=dato.minimo">
-                        <td>{{dato.codigo}}</td>
+                        <td>{{dato.id}}</td>
                         <td>{{dato.nombre}}</td>
-                        <td>{{dato.caracteristicas===false?'':dato.caracteristicas}}</td>
-                        <td>{{dato.cantidad}}</td>
+                        <td>{{dato.medida==false?'':dato.medida}}</td>
                         <td>
-                            <input type="number" [value]="dato.minimo">
+                            <div class="minimo">
+                                <input type="number" min="0" class="minimo_inp" (input)="actualizarMin($event)" value="{{dato.minimo}}">
+                            </div>
                         </td>
-                        <td>
-                            <input type="text" [value]="dato.localizacion==false?'':dato.localizacion">
-                        </td>
+                        <td>{{dato.cantidad}}</td>                        
                         <td >
                             <div class="entregado">
                                 <input type="number" min="0">
-                                <button class="btn btn-primary btn-sm " (click)="descontar($event)" ><i class="fa-solid fa-square-check"></i></button>
+                                <button class="btn btn-primary btn-sm " (click)="descontar($event)" ><i class="fa fa-thumbs-up"></i></button>
                             </div>
                         </td>                    
                         <td>

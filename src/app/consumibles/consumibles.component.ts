@@ -12,9 +12,22 @@ import { DatosService } from '../services/datos.service';
 export class ConsumiblesComponent implements OnInit {
   consumibles:any[] = [];
   isVisible:boolean = false;
+  private limit:number = 100;
   
   public constructor(private odooConsumibles:OdooJsonRpcService,private odooData:DatosService){
     
+  }
+  actualizarMin(event: Event) {
+    let element = event.target as HTMLInputElement;
+    let row = element.parentElement?.parentElement?.parentElement as HTMLInputElement
+    let codigo = row.children[0].textContent==null?0:parseInt(row.children[0].textContent);
+    let minimo = element.value
+
+    this.odooConsumibles.authenticate().subscribe(uid=>{
+      this.odooConsumibles.update(uid,codigo,'dtm.diseno.almacen',{'minimo':minimo}).subscribe(result=>console.log(result))
+    })
+    
+
   }
   descontar(event:Event) {
     let datos:any = [];
@@ -24,54 +37,59 @@ export class ConsumiblesComponent implements OnInit {
     }
 
     let rowTable = element.parentNode?.parentNode?.parentElement as HTMLInputElement;
-    let nombre = rowTable.children[0].textContent;
-    let caracteristicas = rowTable.children[1].textContent;
+    let codigo = rowTable.children[0].textContent;
+    let nombre = rowTable.children[1].textContent;
     let cantidad = rowTable.children[2].textContent;
-    let minimo = rowTable.children[3].children[0] as HTMLInputElement;
     let localizacion = rowTable.children[4].children[0] as HTMLInputElement;
     let entregado = rowTable.children[5].children[0].children[0] as HTMLInputElement;
     let recibe = rowTable.children[6].children[0] as HTMLInputElement;
     let notas = rowTable.children[7].children[0] as HTMLInputElement;
-    datos={'nombre':nombre,'caracteristicas':caracteristicas,'cantidad':cantidad,'minimo':parseInt(minimo.value),'localizacion':localizacion.value,'entregado':parseInt(entregado.value),'recibe':recibe.value,'notas':notas.value}
-    console.log(nombre,caracteristicas,cantidad,minimo.value,localizacion.value,entregado.value,recibe.value,notas.value)
+    datos={'codigo':codigo,'nombre':nombre,'cantidad':cantidad,'localizacion':localizacion.value,'entregado':parseInt(entregado.value),'recibe':recibe.value,'notas':notas.value}
     this.odooConsumibles.authenticate().subscribe(uid=>{
-      this.odooConsumibles.read(uid,[['nombre','=',datos.nombre]],'dtm.diseno.consumibles',['id']).subscribe(getId=>{
-        console.log(getId[0].id )
+      this.odooConsumibles.read(uid,[['codigo','=',datos.codigo]],'dtm.diseno.consumibles',['id','codigo'],this.limit).subscribe(getId=>{
         let nCantidad = datos.cantidad - datos.entregado;
         this.odooConsumibles.update(uid,getId[0].id,'dtm.diseno.consumibles',
           {'cantidad':nCantidad<0?0:nCantidad,
-            'minimo':datos.minimo,
             'localizacion':datos.localizacion,
             'entregado':datos.entregado,
             'recibe':datos.recibe,
-            'notas':datos.notas}).subscribe()
-        this.odooConsumibles.read(uid,[['id','!=','0']],'dtm.diseno.consumibles',
-          ['nombre','caracteristicas','cantidad','minimo','localizacion','notas']).subscribe(datos=>{
-            this.odooData.setConsumibles(datos);
-            this.consumibles = this.odooData.getConsumibles();
-          })
+            'notas':datos.notas}).subscribe(result=>{
+            })
+        this.odooConsumibles.update(uid,getId[0].codigo,'dtm.diseno.almacen',
+          {'cantidad':nCantidad<0?0:nCantidad,
+            'disponible':nCantidad<0?0:nCantidad
+           }).subscribe(result=>{})
+       
+      })
+      this.odooConsumibles.read(uid,[['id','=',datos.codigo]],'dtm.diseno.almacen',['cantidad'],this.limit).subscribe(getCantidad =>{
+        this.odooConsumibles.update(uid,datos.codigo,'dtm.diseno.consumibles',{'cantidad':getCantidad[0].cantidad}).subscribe(result=>{console.log(result)})
       })
     })
 
   }
+
+  fetchConsumibles(): void {
+    this.odooConsumibles.authenticate().subscribe(uid => 
+      this.odooConsumibles.read(uid, [['caracteristicas', '=', 'consumible']], 'dtm.diseno.almacen',
+        ['id', 'nombre', 'cantidad', 'minimo', 'localizacion', 'medida'], this.limit).subscribe(datos => {
+          const sortedArray = datos.sort((a: { cantidad: number; }, b: { cantidad: number; }) => a.cantidad - b.cantidad);
+          this.odooData.setConsumibles(sortedArray);
+          this.consumibles = this.odooData.getConsumibles();
+        })
+    );
+  }
   ngOnInit(): void {
     this.odooData.isConsumibleVisible$.subscribe(visible=>{
       this.isVisible=visible;
-      this.odooConsumibles.authenticate().subscribe(uid => 
-        this.odooConsumibles.read(uid,[['id','!=','0']],'dtm.diseno.consumibles',
-          ['codigo','nombre','caracteristicas','cantidad','minimo','localizacion','notas']).subscribe(datos=>{
-            this.odooData.setConsumibles(datos);
-            const sortedArray = datos.sort((a: { cantidad: number; }, b: { cantidad: number; }) => a.cantidad - b.cantidad);
-            this.consumibles = this.odooData.getConsumibles();
-            
-          })
-      )
+      this.fetchConsumibles();
     })
     this.odooData.consumibles$.subscribe(datos=>{
       this.consumibles = datos;
+      // console.log(datos)
       const findCero = datos.find(dato => dato.cantidad === 0);
       const findMin = datos.find(dato => dato.cantidad <= dato.minimo);
       // console.log(findCero);
+      //Encuentra si hay items con mínimo requerido o cero y pone una vandera
       if (findMin){
         this.odooData.setItemMin(true);
       }
@@ -79,5 +97,10 @@ export class ConsumiblesComponent implements OnInit {
         this.odooData.setItemCero(true);
       }
     })
+    // this.startAutoRefresh();
   }
+
+  
+
+  
 }

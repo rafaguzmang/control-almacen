@@ -1,5 +1,10 @@
 .entregado{
-    display: flex;    
+    display: flex; 
+    width: 100%;   
+}
+
+.entregado input{
+    width: 50%;
 }
 
 button{
@@ -13,4 +18,21 @@ tr.highlight-red{
 
 .highlight-yellow{
     background-color: #f2bb08;
+}
+.minimo{
+    display: flex;
+    width: 100%;
+
+}
+
+.minimo input{
+    width: 50%;
+}
+
+.minimo_head{
+    width: 10%;
+}
+
+.medida_head{
+    width: 15%;
 }
