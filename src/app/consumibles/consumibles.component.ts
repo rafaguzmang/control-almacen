@@ -36,34 +36,34 @@ export class ConsumiblesComponent implements OnInit {
       element = element.parentNode as HTMLButtonElement;
     }
 
-    let rowTable = element.parentNode?.parentNode?.parentElement as HTMLInputElement;
+    let rowTable = element.parentNode?.parentNode?.parentElement as HTMLInputElement;//Se encuentra el valor de la fila
     let codigo = rowTable.children[0].textContent;
     let nombre = rowTable.children[1].textContent;
-    let cantidad = rowTable.children[2].textContent;
-    let localizacion = rowTable.children[4].children[0] as HTMLInputElement;
+    let cantidad = rowTable.children[4].textContent;
     let entregado = rowTable.children[5].children[0].children[0] as HTMLInputElement;
     let recibe = rowTable.children[6].children[0] as HTMLInputElement;
     let notas = rowTable.children[7].children[0] as HTMLInputElement;
-    datos={'codigo':codigo,'nombre':nombre,'cantidad':cantidad,'localizacion':localizacion.value,'entregado':parseInt(entregado.value),'recibe':recibe.value,'notas':notas.value}
+    datos={'codigo':codigo,'nombre':nombre,'cantidad':cantidad,'entregado':parseInt(entregado.value),'recibe':recibe.value,'notas':notas.value}
     this.odooConsumibles.authenticate().subscribe(uid=>{
-      this.odooConsumibles.read(uid,[['codigo','=',datos.codigo]],'dtm.diseno.consumibles',['id','codigo'],this.limit).subscribe(getId=>{
-        let nCantidad = datos.cantidad - datos.entregado;
-        this.odooConsumibles.update(uid,getId[0].id,'dtm.diseno.consumibles',
-          {'cantidad':nCantidad<0?0:nCantidad,
-            'localizacion':datos.localizacion,
-            'entregado':datos.entregado,
-            'recibe':datos.recibe,
-            'notas':datos.notas}).subscribe(result=>{
-            })
-        this.odooConsumibles.update(uid,getId[0].codigo,'dtm.diseno.almacen',
+      this.odooConsumibles.create(uid,'dtm.diseno.consumibles',
+        {
+          'fecha':new Date(),
+          'codigo':datos.codigo,
+          'nombre':datos.nombre,
+          'cantidad':datos.cantidad,
+          'entregado':datos.entregado,
+          'recibe':datos.recibe,
+          'notas':datos.notas}).subscribe(result=>{console.log(result)
+          })
+      this.odooConsumibles.read(uid,[['id','=',datos.codigo]],'dtm.diseno.almacen',['cantidad'],1).subscribe(cantidad => {
+        let nCantidad = cantidad[0].cantidad - datos.cantidad
+        this.odooConsumibles.update(uid,datos.codigo,'dtm.diseno.almacen',
           {'cantidad':nCantidad<0?0:nCantidad,
             'disponible':nCantidad<0?0:nCantidad
-           }).subscribe(result=>{})
-       
+           }).subscribe(result=>{console.log(result)})
+           this.fetchConsumibles();
       })
-      this.odooConsumibles.read(uid,[['id','=',datos.codigo]],'dtm.diseno.almacen',['cantidad'],this.limit).subscribe(getCantidad =>{
-        this.odooConsumibles.update(uid,datos.codigo,'dtm.diseno.consumibles',{'cantidad':getCantidad[0].cantidad}).subscribe(result=>{console.log(result)})
-      })
+     
     })
 
   }
@@ -78,6 +78,7 @@ export class ConsumiblesComponent implements OnInit {
         })
     );
   }
+
   ngOnInit(): void {
     this.odooData.isConsumibleVisible$.subscribe(visible=>{
       this.isVisible=visible;
