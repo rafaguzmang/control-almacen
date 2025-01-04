@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
+import { interval, Subscription, switchMap } from 'rxjs';
+import internal from 'stream';
 
 @Component({
   selector: 'app-consumibles',
@@ -9,13 +11,17 @@ import { DatosService } from '../services/datos.service';
   templateUrl: './consumibles.component.html',
   styleUrl: './consumibles.component.css'
 })
-export class ConsumiblesComponent implements OnInit {
+export class ConsumiblesComponent implements OnInit,OnDestroy {
   consumibles:any[] = [];
   isVisible:boolean = false;
   private limit:number = 100;
+  private autoRefreshSub: Subscription = new Subscription();
   
   public constructor(private odooConsumibles:OdooJsonRpcService,private odooData:DatosService){
     
+  }
+  ngOnDestroy(): void {
+    this.autoRefreshSub.unsubscribe();
   }
   actualizarMin(event: Event) {
     let element = event.target as HTMLInputElement;
@@ -69,21 +75,26 @@ export class ConsumiblesComponent implements OnInit {
   }
 
   fetchConsumibles(): void {
-    this.odooConsumibles.authenticate().subscribe(uid => 
-      this.odooConsumibles.read(uid, [['caracteristicas', '=', 'consumible']], 'dtm.diseno.almacen',
-        ['id', 'nombre', 'cantidad', 'minimo', 'localizacion', 'medida'], this.limit).subscribe(datos => {
-          const sortedArray = datos.sort((a: { cantidad: number; }, b: { cantidad: number; }) => a.cantidad - b.cantidad);
-          this.odooData.setConsumibles(sortedArray);
-          this.consumibles = this.odooData.getConsumibles();
-        })
-    );
+    this.odooConsumibles.authenticate().pipe(
+      switchMap((uid)=>
+      this.odooConsumibles.read(uid,[['caracteristicas','=','consumible']],'dtm.diseno.almacen',
+        ['id','nombre','cantidad','minimo','localizacion','medida'],this.limit))
+    ).subscribe({
+      next:(datos) => {
+        const sortedArray = datos.sort((a: {cantidad:number},b:{cantidad:number})=> a.cantidad - b.cantidad);
+        this.odooData.setConsumibles(sortedArray);
+        this.consumibles = this.odooData.getConsumibles();
+      }
+    })  
+    
   }
 
   ngOnInit(): void {
     this.odooData.isConsumibleVisible$.subscribe(visible=>{
       this.isVisible=visible;
       this.fetchConsumibles();
-    })
+    })    
+   
     this.odooData.consumibles$.subscribe(datos=>{
       this.consumibles = datos;
       // console.log(datos)
@@ -98,7 +109,30 @@ export class ConsumiblesComponent implements OnInit {
         this.odooData.setItemCero(true);
       }
     })
-    // this.startAutoRefresh();
+    this.autoRefresh();
+  }
+
+  autoRefresh():void{
+    this.autoRefreshSub = interval(10000)
+    .pipe(
+      switchMap(()=>this.odooConsumibles.authenticate()),
+      switchMap((uid)=>
+        this.odooConsumibles.read(
+          uid,
+          [['caracteristicas', '=', 'consumible']],
+          'dtm.diseno.almacen',
+          ['id', 'nombre', 'cantidad', 'minimo', 'localizacion', 'medida'],
+          this.limit
+        )
+      )
+    ).subscribe({
+      next: (datos) => {
+        const sortedArray = datos.sort((a: { cantidad: number }, b: { cantidad: number }) => a.cantidad - b.cantidad);
+        this.odooData.setConsumibles(sortedArray);
+        this.consumibles = this.odooData.getConsumibles();
+      }
+    }
+    )
   }
 
   
