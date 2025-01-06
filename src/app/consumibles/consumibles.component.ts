@@ -62,10 +62,10 @@ export class ConsumiblesComponent implements OnInit,OnDestroy {
           'notas':datos.notas}).subscribe(result=>{console.log(result)
           })
       this.odooConsumibles.read(uid,[['id','=',datos.codigo]],'dtm.diseno.almacen',['cantidad'],1).subscribe(cantidad => {
-        let nCantidad = cantidad[0].cantidad - datos.cantidad
+        let nCantidad = cantidad[0].cantidad - datos.entregado
         this.odooConsumibles.update(uid,datos.codigo,'dtm.diseno.almacen',
           {'cantidad':nCantidad<0?0:nCantidad,
-            'disponible':nCantidad<0?0:nCantidad
+            'disponible':0
            }).subscribe(result=>{console.log(result)})
            this.fetchConsumibles();
       })
@@ -109,7 +109,7 @@ export class ConsumiblesComponent implements OnInit,OnDestroy {
         this.odooData.setItemCero(true);
       }
     })
-    this.autoRefresh();
+    // this.autoRefresh();
   }
 
   autoRefresh():void{
