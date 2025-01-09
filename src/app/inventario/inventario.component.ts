@@ -107,7 +107,7 @@ export class InventarioComponent implements OnInit{
         this.inventarioService.update(uid,parseInt(id),'dtm.diseno.almacen',
           {'localizacion':localizacion.value,'cantidad':cantidad.value,'apartado':apartado.value,'disponible':disponible.value}).subscribe(data=>{
           console.log(data)
-          this.fetchInventario();  
+          // this.fetchInventario();  
           alert("Actualizado!!")      
         });
       }
