@@ -55,6 +55,7 @@ export class InventarioComponent implements OnInit{
     }
   }
 
+  // Botón para actualizar información 
   onLocalizacionInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     // console.log(`Valor ingresado: ${input.value}`);
@@ -86,38 +87,28 @@ export class InventarioComponent implements OnInit{
 
   }
   
-  actualizar(event:MouseEvent) {
-    const button = event.target as HTMLElement;
-    let idHtml = button.parentElement?.parentElement?.children[3] as HTMLElement;
-    let localizacionHtml = button.parentElement?.parentElement?.children[3] as HTMLInputElement;
-    let cantidadHtml = button.parentNode?.parentNode?.children[4] as HTMLInputElement;
-    let apartadoHtml = button.parentNode?.parentNode?.children[5] as HTMLInputElement;
-    let disponibleHtmal = button.parentNode?.parentNode?.children[6] as HTMLInputElement;
-    if(button.parentElement?.parentElement?.nodeName != "TR"){
-      idHtml = button.parentElement?.parentElement?.parentElement?.children[0] as HTMLElement;      
-      localizacionHtml = button.parentElement?.parentElement?.parentElement?.children[3] as HTMLInputElement;      
-      cantidadHtml = button.parentNode?.parentNode?.parentElement?.children[4].children[0] as HTMLInputElement;
-      apartadoHtml = button.parentNode?.parentNode?.parentElement?.children[5].children[0] as HTMLInputElement;
-      disponibleHtmal = button.parentNode?.parentNode?.parentElement?.children[6].children[0] as HTMLInputElement;
-    }else{
-      idHtml = button.parentElement?.parentElement?.children[0] as HTMLElement;
-      localizacionHtml = button.parentElement?.parentElement?.children[3].children[0] as HTMLInputElement;
-      cantidadHtml = button.parentNode?.parentNode?.children[4].children[0] as HTMLInputElement;
-      apartadoHtml = button.parentNode?.parentNode?.children[5].children[0] as HTMLInputElement;
-      disponibleHtmal = button.parentNode?.parentNode?.children[6].children[0] as HTMLInputElement;
+  actualizar(event:Event) {    
+    let element = event.target as HTMLButtonElement
+    if(element.nodeName === "I"){
+      element = element.parentNode as HTMLButtonElement;      
     }
 
-    let id = Number(idHtml.textContent ?? 0);
-    let localizacion = localizacionHtml.value;
-    let cantidad = Number(cantidadHtml.value ?? 0);
-    let apartado = Number(apartadoHtml.value ?? 0);
-    let disponible = Number(disponibleHtmal.value ?? 0);
-    // console.log(id,localizacion,cantidad,apartado,disponible);
+    let rowTable = element.parentNode?.parentElement as HTMLInputElement;
+    console.log(rowTable);    
+    let id = rowTable.children[0].textContent??'0';
+    let localizacion = rowTable.children[3].children[0] as HTMLInputElement;
+    let cantidad = rowTable.children[4].children[0] as HTMLInputElement;
+    let apartado = rowTable.children[5].children[0] as HTMLInputElement;
+    let disponible = rowTable.children[6].children[0] as HTMLInputElement;
+    console.log(id,localizacion.value,cantidad.value,apartado.value,disponible.value);
 
     this.inventarioService.authenticate().subscribe((uid: number) => {
       if(uid == 2){
-        this.inventarioService.update(uid,id,'dtm.diseno.almacen',{'localizacion':localizacion,'cantidad':cantidad,'apartado':apartado,'disponible':disponible}).subscribe(data=>{
-        // console.log(data)        
+        this.inventarioService.update(uid,parseInt(id),'dtm.diseno.almacen',
+          {'localizacion':localizacion.value,'cantidad':cantidad.value,'apartado':apartado.value,'disponible':disponible.value}).subscribe(data=>{
+          console.log(data)
+          this.fetchInventario();  
+          alert("Actualizado!!")      
         });
       }
     });  
