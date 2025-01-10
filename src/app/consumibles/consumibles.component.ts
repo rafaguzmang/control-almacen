@@ -14,6 +14,7 @@ import internal from 'stream';
 export class ConsumiblesComponent implements OnInit,OnDestroy {
   consumibles:any[] = [];
   isVisible:boolean = false;
+  empleados:any [] = []
   private limit:number = 100;
   private autoRefreshSub: Subscription = new Subscription();
   
@@ -47,9 +48,11 @@ export class ConsumiblesComponent implements OnInit,OnDestroy {
     let nombre = rowTable.children[1].textContent;
     let cantidad = rowTable.children[4].textContent;
     let entregado = rowTable.children[5].children[0].children[0] as HTMLInputElement;
-    let recibe = rowTable.children[6].children[0] as HTMLInputElement;
+    let recibe = rowTable.children[6].children[0] as HTMLSelectElement;
     let notas = rowTable.children[7].children[0] as HTMLInputElement;
-    datos={'codigo':codigo,'nombre':nombre,'cantidad':cantidad,'entregado':parseInt(entregado.value),'recibe':recibe.value,'notas':notas.value}
+    console.log(recibe)
+    datos={'codigo':codigo,'nombre':nombre,'cantidad':cantidad,'entregado':parseInt(entregado.value),'recibe':recibe.options[recibe.selectedIndex].text,'notas':notas.value}
+    console.log(datos)
     this.odooConsumibles.authenticate().subscribe(uid=>{
       this.odooConsumibles.create(uid,'dtm.diseno.consumibles',
         {
@@ -108,6 +111,11 @@ export class ConsumiblesComponent implements OnInit,OnDestroy {
        if (findCero){
         this.odooData.setItemCero(true);
       }
+    })
+    this.odooConsumibles.authenticate().subscribe(uid =>{
+      this.odooConsumibles.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],50).subscribe(empleados=>{
+        this.empleados = empleados;
+      })
     })
     // this.autoRefresh();
   }

@@ -32,7 +32,13 @@
                             </div>
                         </td>                    
                         <td>
-                            <input type="text" value="" >
+                            <select name="personal" id="personal" >
+                              
+                                @for(empleado of empleados;track empleado.nombre){
+                                    <option value="" >{{empleado.nombre}}</option>
+                                }                               
+                               
+                             </select>
                         </td>                        
                         <td>
                             <input type="text" value="">
