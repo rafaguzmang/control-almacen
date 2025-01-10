@@ -6,6 +6,7 @@
             <th class="numero-tabla-h">Código</th>
             <th>Nombre</th>
             <th>Medida</th>
+            <th>Espec</th>
             <th>Stock</th>
             <th>Cantidad</th>
             <th>Entregado</th>
@@ -35,12 +36,22 @@
                     <td>{{item.codigo}}</td>
                     <td class="nombre_tabla">{{item.nombre}}</td>
                     <td class="number_tabla">{{item.medida}}</td>
+                    <td class="number_tabla">{{item.notas}}</td>
                     <td class="centrar_columna">{{item.stock}}</td>
                     <td class="centrar_columna">{{item.cantidad}}</td>                
                     <td class="entregado">
                         <div class="input-tabla">
                             <input type="number" value={{item.cantidad}} class="me-1 input_number" (input)="entregadoCantidad($event)" [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" >
-                            <input type="text"  class="me-1 input_text" [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" placeholder="Recibe" value="{{item.recibe}}">
+                            <!-- <label type="text" for="personal" class="me-1 input_text"  [style.opacity]="item.entregado ? '0.5' : '1'" placeholder="Recibe" value="{{item.recibe}}"> -->
+                            <select name="personal" id="personal" [style.opacity]="item.entregado ? '0.5' : '1'" >
+                               @if(item.recibe){
+                                    <option value="" >{{item.recibe}}</option>
+                               }@else {
+                                   @for(empleado of empleados;track empleado.nombre){
+                                       <option value="" >{{empleado.nombre}}</option>
+                                   }                               
+                               }
+                            </select>
                             <button class="btn btn-success btn-sm " (click)="entregado($event)"  [hidden]="item.entregado"><i class="fa-solid fa-building-circle-arrow-right"></i></button>
                         </div>
                     </td>                
