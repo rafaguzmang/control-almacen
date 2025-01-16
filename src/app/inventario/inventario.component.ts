@@ -60,6 +60,7 @@ export class InventarioComponent implements OnInit{
     const input = event.target as HTMLInputElement;
     // console.log(`Valor ingresado: ${input.value}`);
     this.localizacion = input.value;
+    this.seach([['nombre','like',this.nombre],['medida','like',this.medida],['localizacion','like',this.localizacion]]);
     if (this.nombre == "" && this.medida=="" && this.localizacion == "" ){
       this.emptyFields();
     }
