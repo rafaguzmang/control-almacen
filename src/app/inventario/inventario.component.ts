@@ -12,7 +12,6 @@ import { DatosService } from '../services/datos.service';
 })
 export class InventarioComponent implements OnInit{
   inventario: any [] = [];
-  isInventVisible:boolean = true;
   // Variables para hacer los filtros
   private nombre:string = "";
   private medida:string = "";
@@ -76,10 +75,7 @@ export class InventarioComponent implements OnInit{
     });   
   }
   ngOnInit(): void {
-    this.inventarioDatos.isInventVisible$.subscribe(visible=>{
-      this.isInventVisible = visible;   
-      this.fetchInventario();
-    })
+    this.fetchInventario();
     
     this.inventarioDatos.inventario$.subscribe((data) => {
       this.inventario = data; // Actualiza la variable local cuando cambian los datos

@@ -13,7 +13,6 @@ import { tick } from '@angular/core/testing';
 export class SolicitudmaterialComponent implements OnInit{
   material:any [] = [];
   empleados:any [] = [];
-  isInordVisible:boolean = true;
   limit = 5;
 
   // Variables para hacer los filtros
@@ -153,14 +152,12 @@ export class SolicitudmaterialComponent implements OnInit{
  
 
   ngOnInit(): void {
-    this.dataMat.isInordVisible$.subscribe(visible =>{
-      this.isInordVisible = visible;
-      this.fetchSolMat( [['id','!=','0']]);
-      this.solMat.authenticate().subscribe(uid =>{
-        this.solMat.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],50).subscribe(empleados=>{
-          this.empleados = empleados;
-        })
+    this.fetchSolMat( [['id','!=','0']]);
+    this.solMat.authenticate().subscribe(uid =>{
+      this.solMat.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],50).subscribe(empleados=>{
+        this.empleados = empleados;
       })
-    })   
+    })
+    
   }
 }

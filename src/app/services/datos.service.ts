@@ -18,19 +18,7 @@ export class DatosService {
   controlEntradas$ = this.controlEntradasSubjet.asObservable();
 
   private consumiblesSubjet = new BehaviorSubject<any[]>([]);
-  consumibles$ = this.consumiblesSubjet.asObservable();
-
-  private isInventVisible = new BehaviorSubject<boolean>(false);
-  isInventVisible$ = this.isInventVisible.asObservable();
-
-  private isInordVisible = new BehaviorSubject<boolean>(false);
-  isInordVisible$ = this.isInordVisible.asObservable();
-
-  private isContentVisible = new BehaviorSubject<boolean>(false);
-  isContentVisible$ = this.isContentVisible.asObservable();
-
-  private isConsumibleVisible = new BehaviorSubject<boolean>(false);
-  isConsumibleVisible$ = this.isConsumibleVisible.asObservable();
+  consumibles$ = this.consumiblesSubjet.asObservable();  
 
   //Indicador si hay items en consumibles con valores de minimos o cero
   private cantMinItem = new BehaviorSubject<boolean>(false);
@@ -87,38 +75,4 @@ export class DatosService {
   getConsumibles():any{
     return this.consumiblesSubjet.getValue();
   }
-  
-  setIsInventVisible(estado:boolean){
-    this.isInventVisible.next(estado);
-  }
-  getIsInventVisible():boolean{
-    return this.isInventVisible.getValue();
-  }
-  
-  setIsInordVisible(estado:boolean){
-    this.isInordVisible.next(estado);
-  }
-  
-  getIsInordVisible():boolean{
-    return this.isInordVisible.getValue();
-  }
-  
-  setIsContentVisible(estado:boolean){
-    this.isContentVisible.next(estado);
-  }
-
-  getIsContentVisible():boolean{
-    return this.isContentVisible.getValue();
-  }
-  
-  setIsConsumibleVisible(estado:boolean){
-    this.isConsumibleVisible.next(estado);
-  }
-
-  getIsConsumibleVisible():boolean{
-    return this.isConsumibleVisible.getValue();
-  }
-  
-
-
 }

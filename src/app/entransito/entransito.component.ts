@@ -11,7 +11,6 @@ import { DatosService } from '../services/datos.service';
 })
 export class EntransitoComponent implements OnInit{
   datos:any [] = [];
-  isVisible:boolean = false;
 
   constructor(private odooConsulta: OdooJsonRpcService,private datosService:DatosService){}
 
@@ -90,20 +89,18 @@ export class EntransitoComponent implements OnInit{
   ngOnInit(): void {
     // Consulta de todos los items   
     // Obserbable para ocultar esta tabla de items
-    this.datosService.isContentVisible$.subscribe(estado=>{
-      this.isVisible = estado;
-      this.odooConsulta.authenticate().subscribe(uid =>{
-        this.odooConsulta.read(uid,[['id','!=','0']],'dtm.control.entradas',['id','orden_trabajo', 'proveedor','codigo','descripcion',
-          'cantidad','fecha_recepcion','fecha_real','factura'],20).subscribe(datos =>{
-            this.datosService.setControlEntradas(datos);
-          })
-        });      
+    this.odooConsulta.authenticate().subscribe(uid =>{
+      this.odooConsulta.read(uid,[['id','!=','0']],'dtm.control.entradas',['id','orden_trabajo', 'proveedor','codigo','descripcion',
+        'cantidad','fecha_recepcion','fecha_real','factura'],20).subscribe(datos =>{
+          this.datosService.setControlEntradas(datos);
       })
+    });      
+     
       // Obserbable tabla de items
-      this.datosService.controlEntradas$.subscribe(datos=>{
-        this.datos = datos;
-      })
-    }
+    this.datosService.controlEntradas$.subscribe(datos=>{
+      this.datos = datos;
+    })
+  }
 
   ordenUpdate(uid:number,orden_trabajo:number,codigo:number,cantidad:number):void{
 

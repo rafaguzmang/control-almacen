@@ -13,7 +13,6 @@ import internal from 'stream';
 })
 export class ConsumiblesComponent implements OnInit,OnDestroy {
   consumibles:any[] = [];
-  isVisible:boolean = false;
   empleados:any [] = []
   private limit:number = 100;
   private autoRefreshSub: Subscription = new Subscription();
@@ -93,10 +92,7 @@ export class ConsumiblesComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit(): void {
-    this.odooData.isConsumibleVisible$.subscribe(visible=>{
-      this.isVisible=visible;
-      this.fetchConsumibles();
-    })    
+    this.fetchConsumibles();
    
     this.odooData.consumibles$.subscribe(datos=>{
       this.consumibles = datos;
