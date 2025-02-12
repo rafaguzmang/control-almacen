@@ -20,12 +20,33 @@ export class DatosService {
   private consumiblesSubjet = new BehaviorSubject<any[]>([]);
   consumibles$ = this.consumiblesSubjet.asObservable();  
 
+  private herramientasSubjet = new BehaviorSubject<any[]>([]);
+  herramienta$ = this.herramientasSubjet.asObservable();
+
   //Indicador si hay items en consumibles con valores de minimos o cero
   private cantMinItem = new BehaviorSubject<boolean>(false);
   cantMinItem$ = this.cantMinItem.asObservable();
   private cantCero = new BehaviorSubject<boolean>(false);
   cantCero$ = this.cantCero.asObservable();
 
+  private empleados = new BehaviorSubject<any[]>([]);
+  empleados$ = this.empleados.asObservable();
+
+  setEmpleados(datos:[]){
+    this.empleados.next(datos);
+  }
+
+  getEmpleados(){
+    return this.empleados.getValue();
+  }
+
+  setHerramientas(datos:[]){
+    this.herramientasSubjet.next(datos);
+  }
+
+  getHerramientas(){
+    return this.herramientasSubjet.getValue();
+  }
   
   setItemCero(dato: boolean) {
     this.cantCero.next(dato)
@@ -70,7 +91,6 @@ export class DatosService {
   setConsumibles(datos:[]){
     this.consumiblesSubjet.next(datos)
   }
-
   
   getConsumibles():any{
     return this.consumiblesSubjet.getValue();

@@ -1,47 +1,63 @@
 <section>
     <div class="container-fluid">
+        <button class="btn btn-info m-1 fa fa-refresh" (click)="restablecerBtn()"></button>
+        <button class="btn btn-info m-1 fa-solid fa-gear btn-confi" [style.backgroundColor]="btnconfigcolor" (click)="minimoBtn()"></button>
         <table class="table table-success table-striped " >
             <thead >
                 <tr >
-                    <td>Código</td>
-                    <td>Nombre</td>
-                    <td class="medida_head">Medida</td>
-                    <td class="minimo_head">Mínimo</td>
-                    <td>Cantidad</td>
-                    <td>Entregado</td>                    
-                    <td>Recibe</td>                    
-                    <td>Notas</td>                    
+                    <td class="medida-codigo">Código</td>
+                    <td class="medida-nombre">Nombre</td>
+                    <td class="medida-medida">Medida</td>
+                    <td class="minimo-minimo" [hidden]="btnconfigcolor===''">Mínimo</td>
+                    <td class="medida-cantidad">Cantidad</td>
+                    <td class="medida-entregado">Entregado</td>                    
+                    <td class="medida-recibe">Recibe</td>                    
+                    <td class="medida-notas">Notas</td>                    
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <td >
+                        <input type="number" min="0" class="td-filter cogigo-search" (input)="codigoSearch($event)">
+                    </td>
+                    <td >
+                        <input type="text" class="td-filter nombre-search" (input)="nombreSearch($event)">
+                    </td>
+                    <td >
+                        <input type="text" class="td-filter medida-search" (input)="medidaSearch($event)">
+                    </td>
+                    <td [hidden]="btnconfigcolor===''"></td>
+                    <td></td>
+                    <td></td>                    
+                    <td></td>                    
+                    <td></td>  
+                </tr>
                 @for (dato of consumibles; track dato.id ){    
                     <tr [class.table-danger]="dato.cantidad===0" [class.table-warning]="dato.cantidad<=dato.minimo">
                         <td>{{dato.id}}</td>
                         <td>{{dato.nombre}}</td>
                         <td>{{dato.medida==false?'':dato.medida}}</td>
-                        <td>
-                            <div class="minimo">
-                                <input type="number" min="0" class="minimo_inp" (input)="actualizarMin($event)" value="{{dato.minimo}}">
+                        <td [hidden]="btnconfigcolor===''">
+                            <div class="td-filter">
+                                <input type="number" min="0"  (input)="actualizarMin($event)" value="{{dato.minimo}}" class="td-filter" >
                             </div>
                         </td>
                         <td>{{dato.cantidad}}</td>                        
                         <td >
-                            <div class="entregado">
-                                <input type="number" min="0">
-                                <button class="btn btn-primary btn-sm " (click)="descontar($event)" ><i class="fa fa-thumbs-up"></i></button>
+                            <div class="td-filter d-flex">
+                                <input type="number" min="0" style="width: 50%;" >
+                                <button class="btn btn-primary btn-sm " (click)="descontar($event)"  ><i class="fa fa-thumbs-up "></i></button>
                             </div>
                         </td>                    
                         <td>
-                            <select name="personal" id="personal" >
-                              
+                            <select name="personal" id="personal" class="td-filter">                              
                                 @for(empleado of empleados;track empleado.nombre){
                                     <option value="" >{{empleado.nombre}}</option>
-                                }                               
-                               
+                                }                                                              
                              </select>
                         </td>                        
                         <td>
-                            <input type="text" value="">
+                            <input type="text" value="" class="td-filter">
                         </td>    
                     </tr>
                 }

@@ -11,18 +11,82 @@ import internal from 'stream';
   templateUrl: './consumibles.component.html',
   styleUrl: './consumibles.component.css'
 })
-export class ConsumiblesComponent implements OnInit,OnDestroy {
+export class ConsumiblesComponent implements OnInit {
   consumibles:any[] = [];
-  empleados:any [] = []
-  private limit:number = 100;
+  empleados:any [] = [];
+  configuracion:boolean = false;
+  btnconfigcolor:string = "";
+  private limit:number = 0;
   private autoRefreshSub: Subscription = new Subscription();
   
   public constructor(private odooConsumibles:OdooJsonRpcService,private odooData:DatosService){
     
   }
-  ngOnDestroy(): void {
-    this.autoRefreshSub.unsubscribe();
+  minimoBtn() {
+    this.configuracion = !this.configuracion;
+      if(this.configuracion){
+      this.btnconfigcolor = "yellow"
+    }else{
+      this.btnconfigcolor = ""
+    }
+
   }
+  restablecerBtn() {    
+    this.consumibles = this.odooData.getConsumibles();
+    let codigo = document.querySelector(".cogigo-search") as HTMLInputElement;    
+    let nombre = document.querySelector(".nombre-search") as HTMLInputElement;    
+    let medida = document.querySelector(".medida-search") as HTMLInputElement;    
+    codigo.value = ''
+    nombre.value = ''
+    medida.value = ''
+  }
+  medidaSearch(event:Event) {
+    let input = event.target as HTMLInputElement;
+    let newtabla:any = [];
+    this.consumibles.forEach(element => {
+      if(String(element.medida).toLocaleLowerCase().match(input.value.toLowerCase())){
+        newtabla.push(element);
+      }
+    })
+    this.consumibles = [];
+    this.consumibles = newtabla;
+    if(input.value ===""){
+      this.consumibles = [];
+      this.consumibles = this.odooData.getConsumibles();
+    }
+    
+  }
+  nombreSearch(event:Event) {
+    let input = event.target as HTMLInputElement;
+    let newtabla:any = [];
+    this.consumibles.forEach(element => {
+      if(String(element.nombre).toLowerCase().match(input.value.toLowerCase())){
+        newtabla.push(element);
+      }
+    })
+    this.consumibles = [];
+    this.consumibles = newtabla;
+    if(input.value ===""){
+      this.consumibles = [];
+      this.consumibles = this.odooData.getConsumibles();
+    }
+  }
+  codigoSearch(event:Event) {
+    let input = event.target as HTMLInputElement;
+    let newtabla:any = [];
+    this.consumibles.forEach(element => {
+      if(String(element.id).match(input.value)){
+        newtabla.push(element);
+      }
+    })
+    this.consumibles = [];
+    this.consumibles = newtabla;
+    if(input.value ===""){
+      this.consumibles = [];
+      this.consumibles = this.odooData.getConsumibles();
+    }
+  }
+  
   actualizarMin(event: Event) {
     let element = event.target as HTMLInputElement;
     let row = element.parentElement?.parentElement?.parentElement as HTMLInputElement
@@ -109,8 +173,9 @@ export class ConsumiblesComponent implements OnInit,OnDestroy {
       }
     })
     this.odooConsumibles.authenticate().subscribe(uid =>{
-      this.odooConsumibles.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],50).subscribe(empleados=>{
-        this.empleados = empleados;
+      this.odooConsumibles.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],0).subscribe(empleados=>{
+        this.odooData.setEmpleados(empleados);
+        this.empleados = this.odooData.getEmpleados();
       })
     })
     // this.autoRefresh();

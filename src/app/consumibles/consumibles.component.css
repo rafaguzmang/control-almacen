@@ -1,16 +1,50 @@
+.medida-codigo{
+    width: 0%;    
+}
+.medida-nombre{
+    width: 15%;    
+}
+.medida-medida{
+    width: 15%;    
+}
+.minimo-minimo{
+    width: 0%;
+}
+.medida-cantidad{
+    width: 0%;
+    
+}
+.medida-entregado{
+    width: 10%;
+    
+}
+.medida-recibe{
+    width: 15%;
+    
+}
+.medida-notas{
+    width: 10%;
+    
+}
+
+.td-filter{
+    width: 100%;
+}
+
+
+
+
 .entregado{
     display: flex; 
     width: 100%;   
 }
 
-.entregado input{
-    width: 50%;
-}
 
 button{
     margin-left: 3px;
 }
 
+/* Condicionales */
 tr.highlight-red{
     background-color: #f2091d !important;
 }
@@ -18,21 +52,4 @@ tr.highlight-red{
 
 .highlight-yellow{
     background-color: #f2bb08;
-}
-.minimo{
-    display: flex;
-    width: 100%;
-
-}
-
-.minimo input{
-    width: 50%;
-}
-
-.minimo_head{
-    width: 10%;
-}
-
-.medida_head{
-    width: 15%;
 }

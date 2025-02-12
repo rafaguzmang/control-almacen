@@ -1,0 +1,27 @@
+.col-codigo{
+    width: 5%;
+}
+.col-cantidad{
+    width: 8%;
+}
+
+.inputNumber{
+    width: 100%;
+}
+
+.inputText{
+    width: 100%;
+}
+
+.btn-entrego{
+    border-radius: 45px;
+}
+
+.btn-entrego-td, .btn-entrego-hd{
+    text-align: center;
+}
+
+.inputText-notas{
+    width: 100%;
+}
+

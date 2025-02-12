@@ -1,1 +1,59 @@
-<p>En construcción!</p>
+<section>
+    <div class="container-fluid">
+        <button class="btn btn-primary mb-1" (input)="onLimpiarInput($event)">Limpiar Campos</button>
+        <table class="table  table-bordered table-hover table-info">
+            <thead>
+                <tr>
+                    <td class="col-codigo">Código</td>
+                    <td>Nombre</td>
+                    <td class="col-cantidad">Cantidad</td>
+                    <td>Responsable</td>
+                    <td>Devolución</td>
+                    <td>Notas</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>                        
+                        <input type="number" class="inputNumber"  (input)="onCodigoInput($event)" placeholder="Id">
+                    </td>
+                    <td>
+                        <input type="text" class="inputText" (input)="onNombreInput($event)" placeholder="Nombre">
+                    </td>
+                    <td>
+                        
+                    </td>
+                    <td>
+                        <input type="text" class="inputText" (input)="onEntregadoInput($event)" placeholder="Responsable">
+                    </td>
+                    <td class="btn-entrego-hd">
+                        <button class="btn btn-primary "><i class="fa fa-check" ></i></button>                        
+                    </td>
+                    <td>
+                        <input type="text" class="inputText inputText-notas" placeholder="Notas">
+                    </td>
+               </tr>
+               @for (dato of tabla; track dato.id ){
+                    <tr>
+                        <td>{{dato.id}}</td>
+                        <td>{{dato.nombre}}</td>
+                        <td>
+                            <input type="number" min="0" class="inputNumber" (input)="onCantidadInput($event)" placeholder="Cant.">
+                        </td>
+                        <td>
+                            <select name="personal" id="personal">
+                                
+                            </select>
+                        </td>
+                        <td class="btn-entrego-td">
+                            <button class="btn btn-warning btn-entrego" ><i class="fa fa-check" ></i></button>
+                        </td>
+                        <td>
+                            <input type="text" class="inputText inputText-notas" placeholder="Notas">
+                        </td>
+                    </tr>
+               }
+            </tbody>
+        </table>
+    </div>
+</section>

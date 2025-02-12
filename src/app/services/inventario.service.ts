@@ -17,7 +17,7 @@ export class OdooJsonRpcService {
    * @param method Método a llamar (por ejemplo: "call")
    * @param params Parámetros a enviar a Odoo
    */
-  private call(method: string, params: any): Observable<any> {
+   private call(method: string, params: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     const body = {
       jsonrpc: '2.0',
@@ -44,7 +44,7 @@ export class OdooJsonRpcService {
   }
 
   read(uid:number,domain:any,model:string,fields:any,maxlim:number):Observable<any>{
-    let method ='call';
+    let method ='call';    
     let params = {
             service: 'object',
             method: 'execute',
@@ -56,10 +56,10 @@ export class OdooJsonRpcService {
               'search_read',     // Método a ejecutar
                 domain, // Dominio para filtrar registros
                 fields,
-                0,    
-                maxlim,
+                0
             ],
           }
+    params.args.push(maxlim);
 
     return this.call(method, params).pipe(
       map((response: any) => response.result) // Transforma la respuesta y retorna solo `result`
