@@ -43,11 +43,12 @@ export class ConsumiblesComponent implements OnInit {
   medidaSearch(event:Event) {
     let input = event.target as HTMLInputElement;
     let newtabla:any = [];
-    this.consumibles.forEach(element => {
-      if(String(element.medida).toLocaleLowerCase().match(input.value.toLowerCase())){
-        newtabla.push(element);
-      }
-    })
+    this.odooData.getConsumibles().forEach
+    // this.odooData.getConsumibles().forEach(element => {
+    //   if(String(element.medida).toLocaleLowerCase().match(input.value.toLowerCase())){
+    //     newtabla.push(element);
+    //   }
+    // })
     this.consumibles = [];
     this.consumibles = newtabla;
     if(input.value ===""){
@@ -158,20 +159,19 @@ export class ConsumiblesComponent implements OnInit {
   ngOnInit(): void {
     this.fetchConsumibles();
    
-    this.odooData.consumibles$.subscribe(datos=>{
-      this.consumibles = datos;
-      // console.log(datos)
-      const findCero = datos.find(dato => dato.cantidad === 0);
-      const findMin = datos.find(dato => dato.cantidad <= dato.minimo);
-      // console.log(findCero);
-      //Encuentra si hay items con mínimo requerido o cero y pone una vandera
-      if (findMin){
-        this.odooData.setItemMin(true);
-      }
-       if (findCero){
-        this.odooData.setItemCero(true);
-      }
-    })
+    this.consumibles = this.odooData.getConsumibles();
+    // console.log(datos)
+    const findCero = this.consumibles.find(dato => dato.cantidad === 0);
+    const findMin = this.consumibles.find(dato => dato.cantidad <= dato.minimo);
+    // console.log(findCero);
+    //Encuentra si hay items con mínimo requerido o cero y pone una vandera
+    if (findMin){
+      this.odooData.setItemMin(true);
+    }
+      if (findCero){
+      this.odooData.setItemCero(true);
+    }
+   
     this.odooConsumibles.authenticate().subscribe(uid =>{
       this.odooConsumibles.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],0).subscribe(empleados=>{
         this.odooData.setEmpleados(empleados);

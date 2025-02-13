@@ -1,33 +1,44 @@
 <section>
     <div class="container-fluid">
-        <button class="btn btn-primary mb-1" (input)="onLimpiarInput($event)">Limpiar Campos</button>
+        <div class="container-fluid d-flex justify-content-between bg-light ">
+            <button class="btn btn-primary mb-1 fa fa-refresh mt-1" (click)="restaurarBtn()"></button>
+            <p>Items: {{tabla.length}}</p>
+        </div>
         <table class="table  table-bordered table-hover table-info">
             <thead>
                 <tr>
-                    <td class="col-codigo">Código</td>
-                    <td>Nombre</td>
-                    <td class="col-cantidad">Cantidad</td>
-                    <td>Responsable</td>
-                    <td>Devolución</td>
-                    <td>Notas</td>
+                    <th class="col-codigo">Código</th>
+                    <th class="col-nombre">Nombre</th>
+                    <th class="col-cantidad">Cantidad</th>
+                    <th class="col-resposable">Responsable</th>
+                    <th class="col-cantidad" >Fecha</th>
+                    <th>Devolución</th>
+                    <th>Notas</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- Buscador -->
                 <tr>
                     <td>                        
-                        <input type="number" class="inputNumber"  (input)="onCodigoInput($event)" placeholder="Id">
+                        <input type="number" class="inputNumber"  (input)="codigoSearch($event)" placeholder="Id">
                     </td>
                     <td>
-                        <input type="text" class="inputText" (input)="onNombreInput($event)" placeholder="Nombre">
+                        <input type="text" class="inputText" (input)="nombreSearch($event)" placeholder="Nombre">
+                    </td>
+                    <td></td>
+                    <td>
+                        <select (input)="personaSearch($event)" class="empleado-search">
+                            <option value="" ></option>
+                            @for(empleado of empleados;track empleado.nombre){
+                                <option value="" >{{empleado.nombre}}</option>
+                            }  
+                        </select>
                     </td>
                     <td>
-                        
-                    </td>
-                    <td>
-                        <input type="text" class="inputText" (input)="onEntregadoInput($event)" placeholder="Responsable">
+                        <input type="date" class="inputText" (input)="fechaSearch($event)">
                     </td>
                     <td class="btn-entrego-hd">
-                        <button class="btn btn-primary "><i class="fa fa-check" ></i></button>                        
+                        <button class="btn btn-primary "><i class="fa fa-check" (click)="devolverTodo()" ></i></button>                        
                     </td>
                     <td>
                         <input type="text" class="inputText inputText-notas" placeholder="Notas">
@@ -38,15 +49,25 @@
                         <td>{{dato.id}}</td>
                         <td>{{dato.nombre}}</td>
                         <td>
-                            <input type="number" min="0" class="inputNumber" (input)="onCantidadInput($event)" placeholder="Cant.">
+                            <input type="number" min="0" class="inputNumber"  placeholder="Cant.">
                         </td>
                         <td>
-                            <select name="personal" id="personal">
-                                
+                            <select name="personal" id="personal" (input)="entrega($event)">
+                                @if (dato.responsable) {
+                                    <option value="">{{dato.responsable}}</option>
+                                }@else{
+                                    <option value="" ></option>
+                                    @for(empleado of empleados;track empleado.nombre){
+                                        <option value="" >{{empleado.nombre}}</option>
+                                    }  
+                                }
                             </select>
                         </td>
+                        <td>
+                            {{dato.fecha_adquisicion==false?'':dato.fecha_adquisicion}}
+                        </td>
                         <td class="btn-entrego-td">
-                            <button class="btn btn-warning btn-entrego" ><i class="fa fa-check" ></i></button>
+                            <button class="btn btn-warning btn-entrego" (click)="devueltoBtn($event)" [hidden]="!dato.responsable"><i class="fa fa-check" ></i></button>
                         </td>
                         <td>
                             <input type="text" class="inputText inputText-notas" placeholder="Notas">

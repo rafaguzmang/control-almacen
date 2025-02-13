@@ -5,6 +5,14 @@
     width: 8%;
 }
 
+.col-resposable{
+    width: 0%;
+}
+
+.col-nombre{
+    width: 22%;
+}
+
 .inputNumber{
     width: 100%;
 }

@@ -91,7 +91,7 @@ export class EntransitoComponent implements OnInit{
     // Obserbable para ocultar esta tabla de items
     this.odooConsulta.authenticate().subscribe(uid =>{
       this.odooConsulta.read(uid,[['id','!=','0']],'dtm.control.entradas',['id','orden_trabajo', 'proveedor','codigo','descripcion',
-        'cantidad','fecha_recepcion','fecha_real','factura'],20).subscribe(datos =>{
+        'cantidad','fecha_recepcion','fecha_real','factura'],0).subscribe(datos =>{
           this.datosService.setControlEntradas(datos);
       })
     });      
