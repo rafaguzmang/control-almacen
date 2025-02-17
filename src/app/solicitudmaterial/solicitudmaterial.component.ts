@@ -14,15 +14,30 @@ export class SolicitudmaterialComponent implements OnInit{
   material:any [] = [];
   empleados:any [] = [];
   limit = 5;
+    
+  constructor(private odooConect:OdooJsonRpcService, private dataMat:DatosService){}
+  
+  exitenciaCBX(event:Event) {
+    let input = event.target as HTMLInputElement;
+    let rowTable = input.parentElement?.parentElement;
+    let orden = (rowTable?.children[0] as HTMLAnchorElement).textContent;
+    let codigo = (rowTable?.children[1] as HTMLAnchorElement).textContent;
+    
+    if(input.checked){
+      this.odooConect.authenticate().subscribe((uid:number)=>{
+        this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],1).subscribe(result=>{
+          console.log(result[0].id,Number(codigo));
+          this.odooConect.read(uid,[['model_id','=',Number(result[0].id)],['materials_list','=',Number(codigo)]],'dtm.materials.line',['id'],0).subscribe(id =>{
+            console.log(id[0].id);
+            this.odooConect.update(uid,Number(id[0].id),'dtm.materials.line',{'almacen':true}).subscribe(listo=>
+              console.log(listo)
+            )
+          })
+        })
+      })
+    }
 
-  // Variables para hacer los filtros
-  private orden:string = "";
-  private codigo:string = "";
-  private nombre:string = "";
-  private medida:string = "";
-  
-  constructor(private solMat:OdooJsonRpcService, private dataMat:DatosService){}
-  
+  }
   // Botón para entregar el material a producción
   entregado(event: Event ):void {
     let element = event.target as HTMLInputElement;    
@@ -38,21 +53,21 @@ export class SolicitudmaterialComponent implements OnInit{
     let entregado = rowTable.children[7].children[0].children[0] as HTMLInputElement;
     let recibe =  rowTable.children[7].children[0].children[1] as HTMLSelectElement;
     console.log(recibe.options[recibe.selectedIndex].text);    
-    this.solMat.authenticate().subscribe((uid: number) => {
+    this.odooConect.authenticate().subscribe((uid: number) => {
       if(uid == 2){
-        this.solMat.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],this.limit).subscribe(ordenData =>{ 
+        this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],this.limit).subscribe(ordenData =>{ 
           // console.log(ordenData[0].id);
-          this.solMat.read(uid,[['model_id','=',ordenData[0].id],['materials_list','=',parseInt(codigo)]],'dtm.materials.line',['id','materials_availabe'],this.limit).subscribe(ordenId =>{
+          this.odooConect.read(uid,[['model_id','=',ordenData[0].id],['materials_list','=',parseInt(codigo)]],'dtm.materials.line',['id','materials_availabe'],this.limit).subscribe(ordenId =>{
             // console.log(ordenId[0].id,ordenId[0].materials_availabe);          
-            this.solMat.update(uid,ordenId[0].id,'dtm.materials.line',{'entregado':true,'recibe':recibe.options[recibe.selectedIndex].text}).subscribe();
-            this.solMat.read(uid,[['id','=',parseInt(codigo)]],'dtm.diseno.almacen',['apartado'],this.limit).subscribe(apartado =>{
+            this.odooConect.update(uid,ordenId[0].id,'dtm.materials.line',{'entregado':true,'recibe':recibe.options[recibe.selectedIndex].text}).subscribe();
+            this.odooConect.read(uid,[['id','=',parseInt(codigo)]],'dtm.diseno.almacen',['apartado'],this.limit).subscribe(apartado =>{
               // console.log(apartado[0].apartado, ordenId[0].materials_availabe)
               let apartadoMaterial = apartado[0].apartado - ordenId[0].materials_availabe;
               if(apartadoMaterial < 0){apartadoMaterial = 0}
               let cantidadMaterial = parseInt(cantidad)-parseInt(entregado.value);
               if(cantidadMaterial < 0){cantidadMaterial = 0}
               // console.log(cantidadMaterial,apartadoMaterial)
-              this.solMat.update(uid,parseInt(codigo),'dtm.diseno.almacen',{'cantidad':cantidadMaterial,'apartado':apartadoMaterial }).subscribe();              
+              this.odooConect.update(uid,parseInt(codigo),'dtm.diseno.almacen',{'cantidad':cantidadMaterial,'apartado':apartadoMaterial }).subscribe();              
             })
           })    
         });
@@ -60,8 +75,7 @@ export class SolicitudmaterialComponent implements OnInit{
       }
     });  
   }
-  // Restringe el valor a los limites de la cantidad solicitada
-  
+  // Restringe el valor a los limites de la cantidad solicitada  
 
   onOrdenInput(event: Event) {
     const input = event?.target as HTMLInputElement;    
@@ -70,7 +84,7 @@ export class SolicitudmaterialComponent implements OnInit{
     if(input.value===""){
       domain = [['id','!=','0']];
     }
-    this.fetchSolMat(domain);
+    this.fetchodooConect(domain);
   }
   
   onCodigoInput(event: Event) {
@@ -78,8 +92,8 @@ export class SolicitudmaterialComponent implements OnInit{
     let num = 0;
     const input = event?.target as HTMLInputElement;  
     console.log(input.value);
-    this.solMat.authenticate().subscribe(uid => {
-      this.solMat.read(uid,[['materials_list','=',parseInt(input.value)],['model_id','!=',false]],'dtm.materials.line',
+    this.odooConect.authenticate().subscribe(uid => {
+      this.odooConect.read(uid,[['materials_list','=',parseInt(input.value)],['model_id','!=',false]],'dtm.materials.line',
       ['model_id','nombre','medida','materials_inventory','materials_cuantity','entregado','recibe'],this.limit).subscribe(data =>{
         for(const item of data){
             console.log(item.model_id[1]);          
@@ -94,34 +108,14 @@ export class SolicitudmaterialComponent implements OnInit{
     });
   }
 
-  onNombreInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    // console.log(`Valor ingresado: ${input.value}`);
-    this.nombre = input.value;
-    // this.solMat([['nombre','like',this.nombre],['medida','like',this.medida],['localizacion','like',this.localizacion]]);
-    // if (this.nombre == "" && this.medida=="" && this.localizacion == "" ){
-    //   this.emptyFields();
-    // }
-  }
-
-  onMedidaInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    // console.log(`Valor ingresado: ${input.value}`);
-    this.medida = input.value;
-    // this.seach([['nombre','like',this.nombre],['medida','like',this.medida],['localizacion','like',this.localizacion]]);
-    // if (this.nombre == "" && this.medida=="" && this.localizacion == "" ){
-    //   this.emptyFields();
-    // }
-  }
-
-  fetchSolMat(dominio:any[]){
+  fetchodooConect(dominio:any[]){
     let num = 0;
     let material:any = [];
-    this.solMat.authenticate().subscribe(uid => 
-      this.solMat.read(uid,dominio,'dtm.proceso',['ot_number','materials_ids'],this.limit).subscribe(data =>{
+    this.odooConect.authenticate().subscribe(uid => 
+      this.odooConect.read(uid,dominio,'dtm.proceso',['ot_number','materials_ids'],this.limit).subscribe(data =>{
         for(const items of data){
           for(const item of items.materials_ids){
-            this.solMat.read(uid,[['id','=',item]],'dtm.materials.line',
+            this.odooConect.read(uid,[['id','=',item]],'dtm.materials.line',
             ['materials_list','nombre','medida', 'materials_cuantity',
             'materials_inventory', 'materials_required','entregado','recibe','notas'],this.limit).subscribe(info => {
               // console.log(info[0].recibe);
@@ -141,9 +135,9 @@ export class SolicitudmaterialComponent implements OnInit{
  
 
   ngOnInit(): void {
-    this.fetchSolMat( [['id','!=','0']]);
-    this.solMat.authenticate().subscribe(uid =>{
-      this.solMat.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],50).subscribe(empleados=>{
+    this.fetchodooConect( [['id','!=','0']]);
+    this.odooConect.authenticate().subscribe(uid =>{
+      this.odooConect.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],50).subscribe(empleados=>{
         this.empleados = empleados;
       })
     })

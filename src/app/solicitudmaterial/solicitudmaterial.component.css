@@ -7,7 +7,15 @@
 }
 
 .number_tabla{
-    width: 20%;
+    width: 10%;
+}
+
+.codigo_tabla{
+    width: 5%;
+}
+
+.th-check{
+    width: 3%;
 }
 
 .input-tabla{
@@ -15,12 +23,16 @@
 }
 
 .numero-tabla-h{
-    width: 8%;
+    width: 5%;
     
 }
 
+.nombre-tabla-h{
+    width: 15%;
+}
+
 .nombre_tabla{
-    width: 30%;
+    width: 25%;
 }
 
 .centrar_columna{
