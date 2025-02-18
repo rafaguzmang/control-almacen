@@ -35,6 +35,18 @@ export class SolicitudmaterialComponent implements OnInit{
           })
         })
       })
+    }else{
+      this.odooConect.authenticate().subscribe((uid:number)=>{
+        this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],1).subscribe(result=>{
+          console.log(result[0].id,Number(codigo));
+          this.odooConect.read(uid,[['model_id','=',Number(result[0].id)],['materials_list','=',Number(codigo)]],'dtm.materials.line',['id'],0).subscribe(id =>{
+            console.log(id[0].id);
+            this.odooConect.update(uid,Number(id[0].id),'dtm.materials.line',{'almacen':false}).subscribe(listo=>
+              console.log(listo)
+            )
+          })
+        })
+      })
     }
 
   }
