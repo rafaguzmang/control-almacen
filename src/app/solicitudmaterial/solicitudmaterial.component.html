@@ -15,7 +15,7 @@
         <tbody>
             <tr>
                 <td>
-                    <input type="number" class="input-tabla" (input)="onOrdenInput($event)" placeholder="Orden">
+                    <input type="number" class="input-tabla orden-search" (input)="onOrdenInput($event)" placeholder="Orden" [value]="ordensch !== '' ? ordensch : ''">
                 </td>
                 <td>                        
                     <input type="number" class="input-tabla"  (input)="onCodigoInput($event)" placeholder="Id">

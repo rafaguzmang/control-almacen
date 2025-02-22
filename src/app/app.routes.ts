@@ -6,10 +6,12 @@ import { ConsumiblesComponent } from './consumibles/consumibles.component';
 import { SolicitudmaterialComponent } from './solicitudmaterial/solicitudmaterial.component';
 import { EntransitoComponent } from './entransito/entransito.component';
 import { HerramientasComponent } from './herramientas/herramientas.component';
+import { HomeComponent } from './home/home.component';
 
 
 export const routes: Routes = [
-    { path: '', component: ConsumiblesComponent },
+    { path: '', component: HomeComponent},
+    { path: 'consumibles', component: ConsumiblesComponent },
     { path: 'ordenes', component: SolicitudmaterialComponent },
     { path: 'transito', component: EntransitoComponent },
     { path: 'inventario', component: InventarioComponent },

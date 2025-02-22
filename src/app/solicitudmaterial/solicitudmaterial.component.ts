@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
 import { tick } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-solicitudmaterial',
@@ -13,9 +14,10 @@ import { tick } from '@angular/core/testing';
 export class SolicitudmaterialComponent implements OnInit{
   material:any [] = [];
   empleados:any [] = [];
-  limit = 5;
+  limit = 10;
+  ordensch:string = '';
     
-  constructor(private odooConect:OdooJsonRpcService, private dataMat:DatosService){}
+  constructor(private odooConect:OdooJsonRpcService, private dataMat:DatosService,private route:ActivatedRoute){}
   
   exitenciaCBX(event:Event) {
     let input = event.target as HTMLInputElement;
@@ -48,7 +50,6 @@ export class SolicitudmaterialComponent implements OnInit{
         })
       })
     }
-
   }
   // Botón para entregar el material a producción
   entregado(event: Event ):void {
@@ -99,6 +100,7 @@ export class SolicitudmaterialComponent implements OnInit{
     this.fetchodooConect(domain);
   }
   
+  
   onCodigoInput(event: Event) {
     let material:any = [];
     let num = 0;
@@ -124,7 +126,7 @@ export class SolicitudmaterialComponent implements OnInit{
     let num = 0;
     let material:any = [];
     this.odooConect.authenticate().subscribe(uid => 
-      this.odooConect.read(uid,dominio,'dtm.proceso',['ot_number','materials_ids'],this.limit).subscribe(data =>{
+      this.odooConect.read(uid,dominio,'dtm.odt',['ot_number','materials_ids'],this.limit).subscribe(data =>{
         for(const items of data){
           for(const item of items.materials_ids){
             this.odooConect.read(uid,[['id','=',item]],'dtm.materials.line',
@@ -144,8 +146,6 @@ export class SolicitudmaterialComponent implements OnInit{
      
   }
 
- 
-
   ngOnInit(): void {
     this.fetchodooConect( [['id','!=','0']]);
     this.odooConect.authenticate().subscribe(uid =>{
@@ -153,6 +153,15 @@ export class SolicitudmaterialComponent implements OnInit{
         this.empleados = empleados;
       })
     })
+
+    this.route.queryParams.subscribe(params => {
+      this.ordensch = params['orden'];
+      if (this.ordensch !== '') {
+        let domain = [['ot_number','=',this.ordensch]];
+        this.fetchodooConect(domain);
+      }
+      
+    });
     
   }
 }

@@ -18,9 +18,10 @@ export class DatosService {
   controlEntradas$ = this.controlEntradasSubjet.asObservable();
 
   private consumibles:any = [];
- 
 
   private herramientas:any = [];
+
+  private ordenes:any = [];
 
   //Indicador si hay items en consumibles con valores de minimos o cero
   private cantMinItem = new BehaviorSubject<boolean>(false);
@@ -30,6 +31,14 @@ export class DatosService {
 
   private empleados = new BehaviorSubject<any[]>([]);
   empleados$ = this.empleados.asObservable();
+
+  setOrdenes(datos:[]){
+    this.ordenes = datos;
+  }
+
+  getOrdenes():any{
+    return this.ordenes;
+  }
 
   setEmpleados(datos:[]){
     this.empleados.next(datos);
