@@ -1,7 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { error } from 'console';
-import { map, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +8,9 @@ import { map, Observable } from 'rxjs';
 export class OdooJsonRpcService {
 
   private odooUrl = 'http://localhost:8069/jsonrpc'; // URL del endpoint JSON-RPC de Odoo
+  private dataSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+  public data$: Observable<any> = this.dataSubject.asObservable();
+  
 
   constructor(private http: HttpClient) { }
 
@@ -17,6 +19,9 @@ export class OdooJsonRpcService {
    * @param method Método a llamar (por ejemplo: "call")
    * @param params Parámetros a enviar a Odoo
    */
+
+  
+
    private call(method: string, params: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     const body = {
@@ -27,7 +32,11 @@ export class OdooJsonRpcService {
 
     };  
     // console.log("Pasa");
-    return this.http.post(this.odooUrl, body, { headers});
+    return this.http.post(this.odooUrl, body, { headers}).pipe(
+      tap((response:any)=>{
+        this.dataSubject.next(response.result);
+      })
+    );
   }
 
   authenticate():Observable<number>{
@@ -42,6 +51,8 @@ export class OdooJsonRpcService {
       map((response: any) => response.result) // Transforma la respuesta y retorna solo `result`
     );
   }
+
+  
 
   read(uid:number,domain:any,model:string,fields:any,maxlim:number):Observable<any>{
     let method ='call';    

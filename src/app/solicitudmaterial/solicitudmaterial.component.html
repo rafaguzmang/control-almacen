@@ -7,7 +7,7 @@
             <th class="nombre-tabla-h">Nombre</th>
             <th class="nombre-tabla-h">Medida</th>
             <th class="text-center"><i class="fa-solid fa-clipboard-check"></i></th>
-            <th>Stock</th>
+            <th class="stock-tabla-h">Stock</th>
             <th>Cantidad</th>
             <th>Entregado</th>
            </tr>
@@ -41,7 +41,10 @@
                     <td class="th-check text-center ">
                         <input type="checkbox" class="form-check-input" (input)="exitenciaCBX($event)">
                     </td>
-                    <td class="centrar_columna">{{item.stock}}</td>
+                    <!-- Actualizar almacén -->
+                    <td class="centrar_columna ">
+                        <input class="w-100" type="number" min="0" value="{{item.stock}}" (input)="almacenFNC($event)">
+                    </td>
                     <td class="centrar_columna">{{item.cantidad}}</td>                
                     <td class="entregado">
                         <div class="d-inline-flex p-3 ">

@@ -3,6 +3,7 @@ import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
 import { tick } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
+import { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
 
 @Component({
   selector: 'app-solicitudmaterial',
@@ -16,8 +17,50 @@ export class SolicitudmaterialComponent implements OnInit{
   empleados:any [] = [];
   limit = 10;
   ordensch:string = '';
-    
+  
   constructor(private odooConect:OdooJsonRpcService, private dataMat:DatosService,private route:ActivatedRoute){}
+
+  almacenFNC(event:Event) {
+    let stock = Number((event.target as HTMLInputElement).value);
+    let codigo = Number((event.target as HTMLInputElement).closest('tr')?.children[1].textContent);
+    let orden = (event.target as HTMLInputElement).closest('tr')?.children[0].textContent;
+    let cantidad = Number((event.target as HTMLInputElement).closest('tr')?.children[6].textContent);
+    this.odooConect.authenticate().subscribe(uid=>{
+      this.odooConect.read(uid,[['id','=',Number(codigo)]],'dtm.diseno.almacen',['id','apartado','disponible'],0).subscribe(almacen=>{
+        this.odooConect.update(uid,almacen[0].id,'dtm.diseno.almacen',{'cantidad':stock}).subscribe(resp=>{
+          this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],1).subscribe(id=>{
+            this.odooConect.read(uid,[['model_id','=',id[0].id],['materials_list','=',codigo]],'dtm.materials.line',
+            ['id','materials_availabe','materials_required'],1).subscribe(selfUpdate=>{
+              let apartar = selfUpdate[0].materials_availabe;
+              let comprar = selfUpdate[0].materials_required;
+              if(almacen[0].disponible > 0 && selfUpdate[0].materials_required > 0 ){
+                if(selfUpdate[0].materials_required <= almacen[0].disponible){
+                  comprar = 0;
+                  apartar = cantidad;
+                }else{
+                  comprar = selfUpdate[0].materials_required - almacen[0].disponible
+                  apartar = selfUpdate[0].materials_availabe + almacen[0].disponible
+                }
+              }
+              this.odooConect.update(uid,selfUpdate[0].id,'dtm.materials.line',{'materials_availabe':apartar,'materials_required':comprar,'materials_inventory':stock}).subscribe(listo=>{
+                this.odooConect.read(uid,[['materials_list','=',codigo]],'dtm.materials.line',['id','materials_availabe'],0).subscribe(codApart=>{
+                  console.log(codApart);
+                  let apartadoMain = codApart.reduce((total:number,cantidad:any) => total + cantidad.materials_availabe,0);
+                  let disponibleMain = almacen[0].disponible
+                  stock < apartadoMain?alert("El Stock no puede ser menor al material total apartado\n Contactar al administrador..."):disponibleMain = stock - apartadoMain ;
+                  disponibleMain < 0?disponibleMain = 0:null
+                  this.odooConect.update(uid,almacen[0].id,'dtm.diseno.almacen',{'apartado':apartadoMain,'disponible':disponibleMain}).subscribe()                  
+                })
+              });
+            }
+            )
+          })
+        });
+      })
+    })
+    
+
+  }
   
   exitenciaCBX(event:Event) {
     let input = event.target as HTMLInputElement;
@@ -28,24 +71,20 @@ export class SolicitudmaterialComponent implements OnInit{
     if(input.checked){
       this.odooConect.authenticate().subscribe((uid:number)=>{
         this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],1).subscribe(result=>{
-          console.log(result[0].id,Number(codigo));
+          // console.log(result[0].id,Number(codigo));
           this.odooConect.read(uid,[['model_id','=',Number(result[0].id)],['materials_list','=',Number(codigo)]],'dtm.materials.line',['id'],0).subscribe(id =>{
-            console.log(id[0].id);
-            this.odooConect.update(uid,Number(id[0].id),'dtm.materials.line',{'almacen':true}).subscribe(listo=>
-              console.log(listo)
-            )
+            // console.log(id[0].id);
+            this.odooConect.update(uid,Number(id[0].id),'dtm.materials.line',{'almacen':true}).subscribe()
           })
         })
       })
     }else{
       this.odooConect.authenticate().subscribe((uid:number)=>{
         this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],1).subscribe(result=>{
-          console.log(result[0].id,Number(codigo));
+          // console.log(result[0].id,Number(codigo));
           this.odooConect.read(uid,[['model_id','=',Number(result[0].id)],['materials_list','=',Number(codigo)]],'dtm.materials.line',['id'],0).subscribe(id =>{
-            console.log(id[0].id);
-            this.odooConect.update(uid,Number(id[0].id),'dtm.materials.line',{'almacen':false}).subscribe(listo=>
-              console.log(listo)
-            )
+            // console.log(id[0].id);
+            this.odooConect.update(uid,Number(id[0].id),'dtm.materials.line',{'almacen':false}).subscribe()
           })
         })
       })
@@ -59,13 +98,13 @@ export class SolicitudmaterialComponent implements OnInit{
         element = element.parentNode as HTMLInputElement;
     }
     let rowTable = element.parentNode?.parentNode?.parentElement as HTMLInputElement;
-    console.log(rowTable);
+    // console.log(rowTable);
     let orden = rowTable.children[0].textContent;
     let codigo = rowTable.children[1].textContent??'0';
     let cantidad = rowTable.children[6].textContent??'0';
     let entregado = rowTable.children[7].children[0].children[0] as HTMLInputElement;
     let recibe =  rowTable.children[7].children[0].children[1] as HTMLSelectElement;
-    console.log(recibe.options[recibe.selectedIndex].text);    
+    // console.log(recibe.options[recibe.selectedIndex].text);    
     this.odooConect.authenticate().subscribe((uid: number) => {
       if(uid == 2){
         this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],this.limit).subscribe(ordenData =>{ 
@@ -92,7 +131,7 @@ export class SolicitudmaterialComponent implements OnInit{
 
   onOrdenInput(event: Event) {
     const input = event?.target as HTMLInputElement;    
-    console.log(input.value);
+    // console.log(input.value);
     let domain = [['ot_number','=',input.value]];
     if(input.value===""){
       domain = [['id','!=','0']];
@@ -110,14 +149,25 @@ export class SolicitudmaterialComponent implements OnInit{
       this.odooConect.read(uid,[['materials_list','=',parseInt(input.value)],['model_id','!=',false]],'dtm.materials.line',
       ['model_id','nombre','medida','materials_inventory','materials_cuantity','entregado','recibe'],this.limit).subscribe(data =>{
         for(const item of data){
-            console.log(item.model_id[1]);          
+            // console.log(item.model_id[1]);          
             material.push({'numero':num++,'orden':item.model_id[1],'codigo':input.value,'nombre':item.nombre,
                                 'medida':item.medida,'stock':item.materials_inventory,'cantidad':item.materials_cuantity,'entregado':item.entregado,
                               'recibe':item.recibe})
-                              
-        } 
-        this.dataMat.setMaterial(material);
-        this.material = this.dataMat.getMaterial();       
+        }
+        this.odooConect.read(uid,[['id','!=','0']],'dtm.diseno.almacen',['id','cantidad'],0).subscribe(result=>{
+          // console.log(material);
+          let cantidadId:any = {};
+          let resulttbl:any[] = result;
+          resulttbl.forEach(idqty=>{
+            cantidadId[idqty.id] = idqty.cantidad;
+          })
+          material.forEach((item:any) => {
+            item.stock = cantidadId[item.codigo]
+          })          
+          this.dataMat.setMaterial(material); 
+          this.material = this.dataMat.getMaterial();       
+        })
+             
       })
     });
   }
@@ -132,15 +182,25 @@ export class SolicitudmaterialComponent implements OnInit{
             this.odooConect.read(uid,[['id','=',item]],'dtm.materials.line',
             ['materials_list','nombre','medida', 'materials_cuantity',
             'materials_inventory', 'materials_required','entregado','recibe','notas'],this.limit).subscribe(info => {
-              // console.log(info[0].recibe);
               material.push({'numero':num++,'orden':items.ot_number,'codigo':info[0].materials_list[0],'nombre':info[0].nombre,
                                   'medida':info[0].medida,'stock':info[0].materials_inventory,'cantidad':info[0].materials_cuantity,'entregado':info[0].entregado,
                                 'recibe':info[0].recibe===false?'':info[0].recibe})
             })
           }           
-        } 
-        this.dataMat.setMaterial(material);
-        this.material = this.dataMat.getMaterial();       
+        }
+        this.odooConect.read(uid,[['id','!=','0']],'dtm.diseno.almacen',['id','cantidad'],0).subscribe(result=>{
+          // console.log(material);
+          let cantidadId:any = {};
+          let resulttbl:any[] = result;
+          resulttbl.forEach(idqty=>{
+            cantidadId[idqty.id] = idqty.cantidad;
+          })
+          material.forEach((item:any) => {
+            item.stock = cantidadId[item.codigo]
+          })          
+          this.dataMat.setMaterial(material); 
+          this.material = this.dataMat.getMaterial();       
+        })
       })
     );  
      
