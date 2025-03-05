@@ -39,7 +39,7 @@
                     <td class="nombre_tabla">{{item.nombre}}</td>
                     <td class="number_tabla">{{item.medida}}</td>
                     <td class="th-check text-center ">
-                        <input type="checkbox" class="form-check-input" (input)="exitenciaCBX($event)">
+                        <input type="checkbox" class="form-check-input" (input)="exitenciaCBX($event)"  [checked]="item.almacen">
                     </td>
                     <!-- Actualizar almacén -->
                     <td class="centrar_columna ">

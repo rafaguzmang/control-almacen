@@ -181,10 +181,10 @@ export class SolicitudmaterialComponent implements OnInit{
           for(const item of items.materials_ids){
             this.odooConect.read(uid,[['id','=',item]],'dtm.materials.line',
             ['materials_list','nombre','medida', 'materials_cuantity',
-            'materials_inventory', 'materials_required','entregado','recibe','notas'],this.limit).subscribe(info => {
+            'materials_inventory', 'materials_required','entregado','recibe','notas','almacen'],this.limit).subscribe(info => {
               material.push({'numero':num++,'orden':items.ot_number,'codigo':info[0].materials_list[0],'nombre':info[0].nombre,
                                   'medida':info[0].medida,'stock':info[0].materials_inventory,'cantidad':info[0].materials_cuantity,'entregado':info[0].entregado,
-                                'recibe':info[0].recibe===false?'':info[0].recibe})
+                                'recibe':info[0].recibe===false?'':info[0].recibe,'almacen':info[0].almacen})
             })
           }           
         }
