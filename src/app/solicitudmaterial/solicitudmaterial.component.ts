@@ -17,6 +17,8 @@ export class SolicitudmaterialComponent implements OnInit{
   empleados:any [] = [];
   limit = 10;
   ordensch:string = '';
+  cliente: string = '';
+  proyecto: string = '';
   
   constructor(private odooConect:OdooJsonRpcService, private dataMat:DatosService,private route:ActivatedRoute){}
 
@@ -136,7 +138,8 @@ export class SolicitudmaterialComponent implements OnInit{
     if(input.value===""){
       domain = [['id','!=','0']];
     }
-    this.fetchodooConect(domain);
+    this.ordensch = input.value;
+    this.fetchodooConect(domain);    
   }
   
   
@@ -176,7 +179,7 @@ export class SolicitudmaterialComponent implements OnInit{
     let num = 0;
     let material:any = [];
     this.odooConect.authenticate().subscribe(uid => 
-      this.odooConect.read(uid,dominio,'dtm.odt',['ot_number','materials_ids'],this.limit).subscribe(data =>{
+      this.odooConect.read(uid,dominio,'dtm.odt',['ot_number','materials_ids','name_client','product_name'],this.limit).subscribe(data =>{
         for(const items of data){
           for(const item of items.materials_ids){
             this.odooConect.read(uid,[['id','=',item]],'dtm.materials.line',
@@ -184,7 +187,7 @@ export class SolicitudmaterialComponent implements OnInit{
             'materials_inventory', 'materials_required','entregado','recibe','notas','almacen'],this.limit).subscribe(info => {
               material.push({'numero':num++,'orden':items.ot_number,'codigo':info[0].materials_list[0],'nombre':info[0].nombre,
                                   'medida':info[0].medida,'stock':info[0].materials_inventory,'cantidad':info[0].materials_cuantity,'entregado':info[0].entregado,
-                                'recibe':info[0].recibe===false?'':info[0].recibe,'almacen':info[0].almacen})
+                                'recibe':info[0].recibe===false?'':info[0].recibe,'almacen':info[0].almacen,'cliente':items.name_client,'proyecto':items.product_name})
             })
           }           
         }
@@ -199,7 +202,11 @@ export class SolicitudmaterialComponent implements OnInit{
             item.stock = cantidadId[item.codigo]
           })          
           this.dataMat.setMaterial(material); 
-          this.material = this.dataMat.getMaterial();       
+          this.material = this.dataMat.getMaterial();    
+          // console.log(this.cliente);         
+          this.cliente = this.material.find(iterator=> iterator.orden === Number(this.ordensch))?.cliente;    
+          this.proyecto = this.material.find(iterator=> iterator.orden === Number(this.ordensch))?.proyecto;    
+          console.log(this.cliente,this.proyecto);
         })
       })
     );  
