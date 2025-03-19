@@ -1,6 +1,5 @@
-<div class="container-md">
-    <div class="col-3 text-center bg-light rounded-1 border border-3 shadow-sm border-info ">
-        
+<div class="container-md d-flex justify-content-around">
+    <div class="col-3 text-center bg-light rounded-1 border border-3 shadow-sm border-info ">        
           <h5>Solicitud para revisión de ordenes</h5>
           <div class="table-responsive " style="height: 300px; overflow-y: auto;">
               <table class="table table-hover table-bordered table-striped table-sm">
@@ -28,4 +27,46 @@
           </div>
         
     </div>
+    <div class="col-3 text-center bg-light rounded-1 border border-3 shadow-sm border-info w-50">        
+          <h5>Datos de las ordenes</h5>
+          <div class="table-responsive w-100" style="height: 300px; overflow-y: auto;">
+              <table class="table table-bordered table-striped table-sm w-100">
+                <thead>
+                  <tr >
+                    <th class="w-5">#</th>
+                    <th >Solicitante</th>
+                    <th >Cliente</th>        
+                    <th >Nombre</th>        
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr >
+                    <th >
+                      <input type="number" class="w-100" (input)="ordenSearch($event)">
+                    </th>
+                    <th >
+                      <input type="text" class="w-100" (input)="solicitanteSearch($event)">
+                    </th>
+                    <th >
+                      <input type="text" class="w-100" (input)="clienteSearch($event)">
+                    </th>
+                    <th >
+                      <input type="text" class="w-100" (input)="productoSearch($event)">
+                    </th>      
+                  </tr>
+                  @for (item of clientes; track item.id) {
+                    <tr (click)="rowSelected($event)">
+                      <td>{{item.ot_number}}</td>
+                      <td>{{item.disenador}}</td>
+                      <td>{{item.name_client}}</td>
+                      <td>{{item.product_name}}</td>
+                     
+                    </tr>     
+                  }                  
+                </tbody>
+              </table>
+          </div>
+        
+    </div>
+   
 </div>

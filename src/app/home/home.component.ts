@@ -12,6 +12,34 @@ import { DatosService } from '../services/datos.service';
 })
 export class HomeComponent implements OnInit {
   tabla:any[] = [];
+  clientes: any;
+
+ 
+
+  ordenSearch(event: Event) {   
+    let input = (event.target as HTMLInputElement).value;  
+    this.clientes = this.datosservice.getClientes();
+    let search = this.datosservice.getClientes().filter((element: any) => String(element.ot_number).match(input));
+    search?this.clientes = search:this.tabla = this.datosservice.getClientes();
+  }
+  solicitanteSearch(event: Event) {  
+    let input = (event.target as HTMLInputElement).value;  
+    this.clientes = this.datosservice.getClientes();
+    let search = this.datosservice.getClientes().filter((element: any) => String(element.disenador).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(input));
+    search?this.clientes = search:this.tabla = this.datosservice.getClientes();
+  }
+  clienteSearch(event: Event) { 
+    let input = (event.target as HTMLInputElement).value;  
+    this.clientes = this.datosservice.getClientes();
+    let search = this.datosservice.getClientes().filter((element: any) => String(element.name_client).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(input));
+    search?this.clientes = search:this.tabla = this.datosservice.getClientes();
+  }
+  productoSearch(event: Event) { 
+    let input = (event.target as HTMLInputElement).value;  
+    this.clientes = this.datosservice.getClientes();
+    let search = this.datosservice.getClientes().filter((element: any) => String(element.product_name).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(input));
+    search?this.clientes = search:this.tabla = this.datosservice.getClientes();
+  }
   
   firmaBTN(event:Event) {
     let id = (event.target as HTMLInputElement).closest("tr")?.children[0].textContent
@@ -26,6 +54,7 @@ export class HomeComponent implements OnInit {
       })
     })
   }
+
   constructor(private router:Router,private odooservice:OdooJsonRpcService,private datosservice:DatosService){}
   rowSelected(event:Event) {    
     let link = (event.target as HTMLInputElement).closest('tr')?.children[0].textContent;
@@ -40,8 +69,18 @@ export class HomeComponent implements OnInit {
       })
     })
   }
+
+  fetchClientes(){
+    this.odooservice.authenticate().subscribe((uid:number)=>{
+      this.odooservice.read(uid,[['id','!=','0'],['ot_number','!=','0']],'dtm.odt',['id','ot_number','disenador','name_client','product_name'],0).subscribe((result:any)=>{
+        this.datosservice.setClientes(result);
+        this.clientes = this.datosservice.getClientes();        
+      })
+    })
+  }
   
   ngOnInit(): void {
     this.fetchAll();
+    this.fetchClientes();
   }
 }

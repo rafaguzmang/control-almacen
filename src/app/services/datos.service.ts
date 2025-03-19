@@ -23,6 +23,8 @@ export class DatosService {
 
   private ordenes:any = [];
 
+  private clientes:any = [];
+
   //Indicador si hay items en consumibles con valores de minimos o cero
   private cantMinItem = new BehaviorSubject<boolean>(false);
   cantMinItem$ = this.cantMinItem.asObservable();
@@ -32,6 +34,14 @@ export class DatosService {
   private empleados = new BehaviorSubject<any[]>([]);
   empleados$ = this.empleados.asObservable();
 
+  setClientes(datos:[]){
+    this.ordenes = datos;
+  }
+
+  getClientes():any{
+    return this.ordenes;
+  }
+
   setOrdenes(datos:[]){
     this.ordenes = datos;
   }
@@ -39,7 +49,7 @@ export class DatosService {
   getOrdenes():any{
     return this.ordenes;
   }
-
+  
   setEmpleados(datos:[]){
     this.empleados.next(datos);
   }
