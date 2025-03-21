@@ -191,8 +191,6 @@ export class SolicitudmaterialComponent implements OnInit{
     let search = searchTable.filter((filter:any) => filter.orden === Number(input.value))
     console.log(search);
     search?this.material = search:this.material = this.dataMat.getMaterial();
-    
-    
   }  
   
   onCodigoInput(event: Event) {
@@ -272,21 +270,13 @@ export class SolicitudmaterialComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    // Obtiene la lista de materiales de todas las odenes y las guarda en local
-    this.fetchodooConect( [['id','!=','0']]);
+    // Obtiene la lista de materiales de todas las ordenes y las guarda en local
+    this.fetchodooConect( [['firma_ventas','!=',false]]);
     // Obtiene la lista de los empleados
     this.odooConect.authenticate().subscribe(uid =>{
       this.odooConect.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],0).subscribe(empleados=>{
         this.empleados = empleados;
       })
-    })
-    // Obtiene las ordenes de trabajo
-    // this.route.queryParams.subscribe(params => {
-    //   this.ordensch = params['orden'];
-    //   if (this.ordensch !== '') {
-    //     let domain = [['ot_number','=',this.ordensch]];
-    //     this.fetchodooConect(domain);
-    //   }      
-    // });    
+    })   
   }
 }

@@ -14,8 +14,6 @@ export class HomeComponent implements OnInit {
   tabla:any[] = [];
   clientes: any;
 
- 
-
   ordenSearch(event: Event) {   
     let input = (event.target as HTMLInputElement).value;  
     this.clientes = this.datosservice.getClientes();
@@ -72,7 +70,7 @@ export class HomeComponent implements OnInit {
 
   fetchClientes(){
     this.odooservice.authenticate().subscribe((uid:number)=>{
-      this.odooservice.read(uid,[['id','!=','0'],['ot_number','!=','0']],'dtm.odt',['id','ot_number','disenador','name_client','product_name'],0).subscribe((result:any)=>{
+      this.odooservice.read(uid,[['firma_ventas','!=',false],['ot_number','!=','0']],'dtm.odt',['id','ot_number','disenador','name_client','product_name'],0).subscribe((result:any)=>{
         this.datosservice.setClientes(result);
         this.clientes = this.datosservice.getClientes();        
       })
