@@ -190,7 +190,7 @@ export class SolicitudmaterialComponent implements OnInit{
     console.log(Number(input.value));
     let search = searchTable.filter((filter:any) => filter.orden === Number(input.value))
     console.log(search);
-    search?this.material = search:this.material = this.dataMat.getMaterial();
+    this.material = search.length > 0 ? search : this.dataMat.getMaterial();
   }  
   
   onCodigoInput(event: Event) {
@@ -230,13 +230,13 @@ export class SolicitudmaterialComponent implements OnInit{
     let material:any = [];
     this.odooConect.authenticate().subscribe(uid => 
       // Lee todas las ordenes de diseño sin importar su status
-      this.odooConect.read(uid,dominio,'dtm.odt',['ot_number','materials_ids','name_client','product_name'],this.limit).subscribe(data =>{
+      this.odooConect.read(uid,dominio,'dtm.odt',['ot_number','materials_ids','name_client','product_name'],0).subscribe(data =>{
         for(const items of data){
           // Lee la lista de materiales de todas las ordenes
           for(const item of items.materials_ids){
             this.odooConect.read(uid,[['id','=',item]],'dtm.materials.line',
             ['materials_list','nombre','medida', 'materials_cuantity',
-            'materials_inventory', 'materials_required','entregado','recibe','notas','almacen'],this.limit).subscribe(info => {
+            'materials_inventory', 'materials_required','entregado','recibe','notas','almacen'],0).subscribe(info => {
               // Se crea una tabla para agregar todos los datos necesarios
               material.push({'numero':num++,'orden':items.ot_number,'codigo':info[0].materials_list[0],'nombre':info[0].nombre,
                                   'medida':info[0].medida,'stock':info[0].materials_inventory,'cantidad':info[0].materials_cuantity,'entregado':info[0].entregado,
