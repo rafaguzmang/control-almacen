@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
@@ -13,6 +13,9 @@ import { DatosService } from '../services/datos.service';
 export class HomeComponent implements OnInit {
   tabla:any[] = [];
   clientes: any;
+
+  constructor(private router:Router,private odooservice:OdooJsonRpcService,private datosservice:DatosService,private ngzone:NgZone){}
+
 
   ordenSearch(event: Event) {   
     let input = (event.target as HTMLInputElement).value;  
@@ -48,12 +51,11 @@ export class HomeComponent implements OnInit {
           console.log(done)
           this.fetchAll();
         })
-
       })
     })
   }
 
-  constructor(private router:Router,private odooservice:OdooJsonRpcService,private datosservice:DatosService){}
+  
   rowSelected(event:Event) {    
     let link = (event.target as HTMLInputElement).closest('tr')?.children[0].textContent;
     this.router.navigate(['/ordenes'],{queryParams:{orden:link}})
@@ -78,7 +80,14 @@ export class HomeComponent implements OnInit {
   }
   
   ngOnInit(): void {
-    this.fetchAll();
+    this.ngzone.runOutsideAngular(()=>{
+      setInterval(() => {
+        this.ngzone.run(()=>{
+          this.fetchAll();    
+        })
+      }, 5000);
+    }) 
     this.fetchClientes();
+   
   }
 }

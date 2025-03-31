@@ -1,7 +1,6 @@
 <div class="container-fluid">
     
     <table class="table  table-bordered table-hover table-primary" >
-        <caption >{{cliente}} - {{proyecto}}</caption>
         <thead class="table-dark">
            <tr>
             <th class="numero-tabla-h">Orden</th>
@@ -17,9 +16,11 @@
         <tbody>
             <tr>
                 <td>
+                    <!-- Buscador por número de orden -->
                     <input type="number" class="input-tabla orden-search" (input)="onOrdenInput($event)" placeholder="Orden" [value]="ordensch !== '' ? ordensch : ''">
                 </td>
                 <td>                        
+                    <!-- Buscador por código -->
                     <input type="number" class="input-tabla"  (input)="onCodigoInput($event)" placeholder="Id">
                 </td>
                 <td>

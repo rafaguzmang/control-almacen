@@ -20,8 +20,6 @@ export class OdooJsonRpcService {
    * @param params Parámetros a enviar a Odoo
    */
 
-  
-
    private call(method: string, params: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     const body = {
@@ -31,12 +29,7 @@ export class OdooJsonRpcService {
       id: new Date().getTime() // Usa un identificador único.
 
     };  
-    // console.log("Pasa");
-    return this.http.post(this.odooUrl, body, { headers}).pipe(
-      tap((response:any)=>{
-        this.dataSubject.next(response.result);
-      })
-    );
+    return this.http.post(this.odooUrl, body, { headers});
   }
 
   authenticate():Observable<number>{
@@ -52,8 +45,6 @@ export class OdooJsonRpcService {
     );
   }
 
-  
-
   read(uid:number,domain:any,model:string,fields:any,maxlim:number):Observable<any>{
     let method ='call';    
     let params = {
@@ -66,7 +57,7 @@ export class OdooJsonRpcService {
               model, // Nombre del modelo
               'search_read',     // Método a ejecutar
                 domain, // Dominio para filtrar registros
-                fields,
+                fields, // Campos a leer
                 0
             ],
           }
