@@ -9,12 +9,12 @@ import { MaterialesComponent } from './materiales/materiales.component';
 
 
 export const routes: Routes = [
-    { path: 'home', component: HomeComponent},
+    { path: '', component: HomeComponent},
     { path: 'consumibles', component: ConsumiblesComponent },
     { path: 'ordenes', component: SolicitudmaterialComponent },
     { path: 'transito', component: EntransitoComponent },
     { path: 'inventario', component: InventarioComponent },
     { path: 'herramientas', component: HerramientasComponent },
-    { path: '', component: MaterialesComponent },
+    { path: 'materiales', component: MaterialesComponent },
     
 ];
