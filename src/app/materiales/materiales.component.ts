@@ -15,7 +15,7 @@ export class MaterialesComponent implements OnInit{
   
   // Variables para la configuración de máximos y mínimos
   btnconfigcolor:string = "gray";
-  configuracion:boolean = false;
+  configuracion:boolean = true;
   
   constructor(
     private odooConect:OdooJsonRpcService,
