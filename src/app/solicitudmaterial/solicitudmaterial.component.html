@@ -14,14 +14,14 @@
            </tr>
         </thead>
         <tbody>
-            <tr>
+            <tr> <!--  Buscador -->
                 <td>
                     <!-- Buscador por número de orden -->
-                    <input type="number" class="input-tabla orden-search" (input)="onOrdenInput($event)" placeholder="Orden" [value]="ordensch !== '' ? ordensch : ''">
+                    <input type="number" min="0" class="input-tabla orden-search" (input)="onOrdenInput($event)" placeholder="Orden" [value]="ordensch !=0 ? ordensch : 0">
                 </td>
                 <td>                        
                     <!-- Buscador por código -->
-                    <input type="number" class="input-tabla"  (input)="onCodigoInput($event)" placeholder="Id">
+                    <input type="number" min="0" class="input-tabla"  (input)="onCodigoInput($event)" placeholder="Id">
                 </td>
                 <td>
                     <!-- <input type="text" class="inputText" (input)="onNombreInput($event)" placeholder="Nombre"> -->
