@@ -5,41 +5,52 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class DatosService {
- 
+  
+  
   
   
   private invetarioSubjet = new BehaviorSubject<any[]>([]);
   inventario$ = this.invetarioSubjet.asObservable();
-
+  
   private materialSubjet = new BehaviorSubject<any[]>([]);
   material$ = this.materialSubjet.asObservable();
-
+  
   private controlEntradasSubjet = new BehaviorSubject<any[]>([]);
   controlEntradas$ = this.controlEntradasSubjet.asObservable();
-
+  
   private consumibles:any = [];
-
+  
   private herramientas:any = [];
-
+  
   private ordenes:any = [];
-
+  
   private clientes:any = [];
-
+  
+  private onlyMaterials:any = [];
+  
   //Indicador si hay items en consumibles con valores de minimos o cero
   private cantMinItem = new BehaviorSubject<boolean>(false);
   cantMinItem$ = this.cantMinItem.asObservable();
   private cantCero = new BehaviorSubject<boolean>(false);
   cantCero$ = this.cantCero.asObservable();
-
+  
   private empleados = new BehaviorSubject<any[]>([]);
   empleados$ = this.empleados.asObservable();
 
+  getOnlyMateriales(): any[] {
+    return this.onlyMaterials;
+  }
+
+  setOnlyMaterials(materiales: any) {
+    this.onlyMaterials = materiales;
+  }
+
   setClientes(datos:[]){
-    this.ordenes = datos;
+    this.clientes = datos;
   }
 
   getClientes():any{
-    return this.ordenes;
+    return this.clientes;
   }
 
   setOrdenes(datos:[]){

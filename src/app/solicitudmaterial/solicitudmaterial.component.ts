@@ -15,7 +15,7 @@ export class SolicitudmaterialComponent implements OnInit{
   material:any [] = [];
   empleados:any [] = [];
   limit = 10;
-  ordensch:string = '';
+  ordensch:number = 0;
   codigosch:string = '';
   cliente: string = '';
   proyecto: string = '';
@@ -44,7 +44,6 @@ export class SolicitudmaterialComponent implements OnInit{
       })
     })    
   }
-
   
   getModelId(uid:number,orden:number){   
     return this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],1);
@@ -53,11 +52,13 @@ export class SolicitudmaterialComponent implements OnInit{
   updateData(uid:number,id:number,modelo:string,val:any){
     this.odooConect.update(uid,id,'dtm.diseno.almacen',val).subscribe()
   }
-
+  // Si hay material sobrante se inserta en las demas ordenes que lo soliciten
   apartadosFunc(uid:number,codigo:number,stock:number){
+    // Lee de la lista de materiales de las ordenes aquellas que en requerido sea diferente de cero
     this.odooConect.read(uid,[['materials_list','=',codigo]],'dtm.materials.line',['id','materials_required','materials_availabe','materials_cuantity'],0).subscribe(result=>{      
+
       let apartados = result.reduce((total:number,cantidad:any) => total + cantidad.materials_availabe,0);
-      let disponibles = stock - apartados;
+      let disponibles = (stock - apartados)>0?stock-apartados:0;
       let newList = result.filter((filter:any) => filter.materials_required !== 0)
       if(disponibles > 0){
         for(let material of newList){
@@ -76,10 +77,13 @@ export class SolicitudmaterialComponent implements OnInit{
       }
       this.odooConect.update(uid,codigo,'dtm.diseno.almacen',{'cantidad':stock,'apartado':stock-disponibles<0?0:stock-disponibles,'disponible':disponibles}).subscribe(()=>{
         newList.forEach((element:any) => { 
-          this.odooConect.update(uid,element.id,'dtm.materials.line',{'materials_required':element.materials_required,'materials_availabe':element.materials_availabe,'materials_inventory':stock,'almacen':true}).subscribe();                    
+          this.odooConect.update(uid,element.id,'dtm.materials.line',{'materials_required':element.materials_required,
+            'materials_availabe':element.materials_availabe,'materials_inventory':stock,'almacen':true}).subscribe(()=>{
+              this.searchCodigo();
+          });                    
         });
-      })
-    
+        
+      })    
     })
   }
 
@@ -110,7 +114,6 @@ export class SolicitudmaterialComponent implements OnInit{
           // this.odooConect.update(uid,itemData.codigo,'dtm.diseno.almacen',{'cantidad':stock,'apartado':})
         });
       });
-      alert('Stock Actualizado');
     })
   }
   
@@ -199,32 +202,37 @@ export class SolicitudmaterialComponent implements OnInit{
     let searchTable:any = [];
     this.material = this.dataMat.getMaterial(); 
     searchTable = this.dataMat.getMaterial();
-    let search = searchTable.filter((filter:any) => String(filter.orden).match(this.ordensch))
+    let search = searchTable.filter((filter:any) =>filter.orden==this.ordensch)
+    search = search.sort((a:any,b:any)=>a.ot_number - b.ot_number);
     this.material = search.length > 0 ? search : null;
     this.material = !this.ordensch ? this.dataMat.getMaterial() : this.material;
-  }  
-
-  // Captura el valor de input para buscar por id
-  onOrdenInput(event: Event) {
-    const input = event?.target as HTMLInputElement;   
-    this.ordensch = input.value;
-    this.searchOT();
-  }  
+  }
   
-  onCodigoInput(event: Event) {
-    const input = event?.target as HTMLInputElement;  
-    this.codigosch = input.value;
-    // console.log(this.codigosch);
-
+  searchCodigo(){
     let searchTable:any = [];
     this.material = this.dataMat.getMaterial(); 
     searchTable = this.dataMat.getMaterial();
+    console.log("Busca");
+
     let search = searchTable.filter((filter:any) => String(filter.codigo).match(this.codigosch))
-    // console.log("search",search);
+    search = search.sort((a:any,b:any)=>a.codigo - b.codigo)
     this.material = search.length > 0 ? search : null;
-    this.material = !this.codigosch ? this.dataMat.getMaterial() : this.material;    
+    this.material = !this.codigosch ? this.dataMat.getMaterial() : this.material;
   }
 
+  // Buscador por número de orden
+  onOrdenInput(event: Event) {
+    const input = event?.target as HTMLInputElement;   
+    this.ordensch = Number(input.value);    
+    this.searchOT();
+  }  
+  // Buscador por código
+  onCodigoInput(event: Event) {
+    const input = event?.target as HTMLInputElement;  
+    this.codigosch = input.value;
+    this.searchCodigo();   
+  }
+  // Obtiene la lista de todas las ordenes incluyendo sus materiales
   fetchodooConect(){
     let num = 0;
     let material:any = [];
@@ -238,8 +246,7 @@ export class SolicitudmaterialComponent implements OnInit{
           material.push({'numero':num++,'orden':Number(row.model_id[1]),'codigo':row.materials_list[0],'nombre':row.nombre,
                             'medida':row.medida,'stock':row.materials_inventory,'cantidad':row.materials_cuantity,'entregado':row.entregado,
                             'recibe':row.recibe===false?'':row.recibe,'almacen':row.almacen})
-          })
-          
+          })          
       
         // Lee todo el inventario para poder agregar el stock cargado en sistema
         this.odooConect.read(uid,[['id','!=','0']],'dtm.diseno.almacen',['id','cantidad'],0).subscribe(result=>{
@@ -256,12 +263,16 @@ export class SolicitudmaterialComponent implements OnInit{
           // Pasa la información a la tabla correspondiente en un service     
           this.dataMat.setMaterial(material); 
           // Carga la tabla local con la información desde el service
-          this.material = this.dataMat.getMaterial();       
+          this.material = this.dataMat.getMaterial();   
+          this.route.queryParams.subscribe(params=> {
+            this.ordensch=params['orden'];
+            this.ordensch?this.searchOT():null;
+          })    
         })
       })
     );       
   }
-
+  // Función para leer la lista de empleados
   empleadosList(){
     this.odooConect.authenticate().subscribe(uid=>{
       this.odooConect.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],0).subscribe(result=>{
@@ -274,6 +285,8 @@ export class SolicitudmaterialComponent implements OnInit{
   ngOnInit(): void {
     // Obtiene la lista de materiales de todas las ordenes y las guarda en local
     this.fetchodooConect( );
+    // Obtiene la lista de empleados
     this.empleadosList();
+   
   }
 }

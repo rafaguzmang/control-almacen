@@ -12,34 +12,34 @@ import { DatosService } from '../services/datos.service';
 })
 export class HomeComponent implements OnInit {
   tabla:any[] = [];
-  clientes: any;
+  clientes: any[] = [];
 
   constructor(private router:Router,private odooservice:OdooJsonRpcService,private datosservice:DatosService,private ngzone:NgZone){}
 
 
   ordenSearch(event: Event) {   
-    let input = (event.target as HTMLInputElement).value;  
-    this.clientes = this.datosservice.getClientes();
-    let search = this.datosservice.getClientes().filter((element: any) => String(element.ot_number).match(input));
-    search?this.clientes = search:this.tabla = this.datosservice.getClientes();
+    let input = (event.target as HTMLInputElement).value;      
+    let search = this.datosservice.getClientes().filter((element: any) => String(element.ot_number).includes(input)); 
+    search = search.sort((a:any,b:any)=> a.ot_number - b.ot_number);
+    this.clientes = search.length > 0?search:this.datosservice.getClientes();
   }
   solicitanteSearch(event: Event) {  
     let input = (event.target as HTMLInputElement).value;  
-    this.clientes = this.datosservice.getClientes();
     let search = this.datosservice.getClientes().filter((element: any) => String(element.disenador).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(input));
-    search?this.clientes = search:this.tabla = this.datosservice.getClientes();
+    search = search.sort((a:any,b:any)=> a.ot_number - b.ot_number);
+    this.clientes = search.length > 0?search:this.datosservice.getClientes();
   }
   clienteSearch(event: Event) { 
     let input = (event.target as HTMLInputElement).value;  
-    this.clientes = this.datosservice.getClientes();
     let search = this.datosservice.getClientes().filter((element: any) => String(element.name_client).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(input));
-    search?this.clientes = search:this.tabla = this.datosservice.getClientes();
+    search = search.sort((a:any,b:any)=> a.ot_number - b.ot_number);
+    this.clientes = search.length > 0?search:this.datosservice.getClientes();
   }
   productoSearch(event: Event) { 
     let input = (event.target as HTMLInputElement).value;  
-    this.clientes = this.datosservice.getClientes();
     let search = this.datosservice.getClientes().filter((element: any) => String(element.product_name).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(input));
-    search?this.clientes = search:this.tabla = this.datosservice.getClientes();
+    search = search.sort((a:any,b:any)=> a.ot_number - b.ot_number);
+    this.clientes = search.length > 0?search:this.datosservice.getClientes();
   }
   
   firmaBTN(event:Event) {
@@ -55,7 +55,7 @@ export class HomeComponent implements OnInit {
     })
   }
 
-  
+  // Obtiene la orden para buscarla en el modulo de Ordenes
   rowSelected(event:Event) {    
     let link = (event.target as HTMLInputElement).closest('tr')?.children[0].textContent;
     this.router.navigate(['/ordenes'],{queryParams:{orden:link}})
@@ -87,7 +87,6 @@ export class HomeComponent implements OnInit {
         })
       }, 5000);
     }) 
-    this.fetchClientes();
-   
+    this.fetchClientes();   
   }
 }

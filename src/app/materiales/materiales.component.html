@@ -1,0 +1,61 @@
+<div class="container main">
+    <button class="btn btn-primary m-1 fa-solid fa-gear" [style.backgroundColor]="btnconfigcolor" (click)="minimoBtn()"></button>        <table class="table table-striped"></table>
+    <div class="container ">
+        <table class="table table-striped w-100">
+            <thead class="table-primary text-white w-100">
+                <tr class="border border-dark w-100">
+                    <th class="text-center width-5">Código</th>
+                    <th class="width-20">Nombre</th>
+                    <th class="width-20">Medida</th>
+                    <th class="text-center width-5" [hidden]="btnconfigcolor===''">Mínimo</th>
+                    <th class="text-center width-5" [hidden]="btnconfigcolor===''">Máximo</th>
+                    <th class="text-center width-5">Cantidad</th>
+                    <th class="text-center width-5">Apartado</th>
+                    <th class="text-center width-5">Disponible</th>
+                </tr>
+            </thead>
+            <tbody class="w-100">
+                <tr class="w-100">
+                    <td>
+                        <input type="number" min="0" class="w-100" (input)="codigoSearch($event)">
+                    </td>
+                    <td>
+                        <input type="text" class="w-100" (input)="nombreSearch($event)">
+                    </td>
+                    <td>
+                        <input type="text" class="w-100" (input)="materialSearch($event)">
+                    </td>
+                    <td [hidden]="btnconfigcolor===''"></td>
+                    <td [hidden]="btnconfigcolor===''"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                @for(material of table; track material.id){
+
+                    <tr class="w-100" [class.table-danger]="material.cantidad<=material.minimo && material.minimo != 0">
+                        <td class="text-center">{{material.id}}</td>
+                        <td >{{material.nombre}}</td>
+                        <td >{{material.medida}}</td>
+                        <td class="text-center" [hidden]="btnconfigcolor===''">
+                            <input class="w-100  text-center" type="number" min="0" value="{{material.minimo}}" (input)="upDateCant($event)">
+                        </td>
+                        <td class="text-center" [hidden]="btnconfigcolor===''">
+                            <input class="w-100  text-center" type="number" min="0" value="{{material.maximo}}" (input)="upDateCant($event)">
+                        </td>
+                        <td class="text-center">
+                            <input class="w-100 text-center" type="number" min="0" value="{{material.cantidad}}" (input)="upDateCant($event)">
+                        </td>
+                        <td class="text-center">
+                            <input class="w-100 text-center" type="number" min="0" value="{{material.apartado}}" (input)="upDateCant($event)">
+                        </td>
+                        <td class="text-center">
+                            <input class="w-100 text-center" type="number" min="0" value="{{material.disponible}}" (input)="upDateCant($event)">
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
