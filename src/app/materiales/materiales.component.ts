@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, input, OnInit } from '@angular/core';
 import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
 
@@ -12,17 +12,65 @@ import { DatosService } from '../services/datos.service';
 export class MaterialesComponent implements OnInit{
   
   table:any [] = [];
+
+  // Variables para criterios de busqueda
+  private concepto:string = '';
+  private material:string = '';
+  private medidaCompleta:string ='';
+  private calibre:string = '';
   
   // Variables para la configuración de máximos y mínimos
-  btnconfigcolor:string = "gray";
-  configuracion:boolean = true;
+  btnconfigcolor:string = "";
+  configuracion:boolean = false;
+  
   
   constructor(
     private odooConect:OdooJsonRpcService,
     private datosService:DatosService,
     private cdr: ChangeDetectorRef
-  ){}
+  ){} 
 
+  //Busca los items por medida
+  searchFiltroMedida(){
+    let medida = `${this.medidaCompleta}${this.calibre}`;
+    (document.getElementById('materialSearch') as HTMLInputElement).value = medida;
+    const search = this.datosService.getOnlyMateriales().filter(row=>String(row.medida).includes(medida));
+    this.table = search.length > 0?search:this.datosService.getOnlyMateriales();
+  }
+
+  //Busca los items por nombre
+  searchFiltroNombre(){
+    let criterio = `${this.concepto} ${this.material}`;
+    (document.getElementById('nombreSearch') as HTMLInputElement).value = criterio;
+    const search = this.datosService.getOnlyMateriales().filter(row=>String(row.nombre).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(criterio.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
+    this.table = search.length > 0?search:this.datosService.getOnlyMateriales();
+  }
+  
+  // Recibe el calibre a buscar
+  searchMedidaCalibreInputFiltro(event:Event) {    
+    const input = event.target as HTMLSelectElement;    
+    this.calibre = (input.options[input.selectedIndex].textContent??'');
+    this.searchFiltroMedida();
+  }
+
+  // Recibe la medida a buscar
+  searchMedidaCompletaInputFiltro(event:Event) {    
+    const input = event.target as HTMLSelectElement;    
+    this.medidaCompleta = (input.options[input.selectedIndex].textContent??'');
+    this.searchFiltroMedida();
+  }
+  // Recibe el tipo de material a buscar (Acero al carbón,Inoxidable..)
+  searchMaterialInputFiltro(event:Event) {    
+    const input = event.target as HTMLSelectElement;    
+    this.material = (input.options[input.selectedIndex].textContent??'');
+    this.searchFiltroNombre();
+  }
+  // Recibe el tipo de concepto a buscar (Lámina,Perfil..)
+  searchConceptoInputFiltro(event:Event) {    
+    const input = event.target as HTMLSelectElement;    
+    this.concepto = (input.options[input.selectedIndex].textContent??'');
+    this.searchFiltroNombre();
+  }
   
   // busca por código
   codigoSearch(event:Event) {
@@ -33,13 +81,13 @@ export class MaterialesComponent implements OnInit{
   // busca por nombre
   nombreSearch(event:Event) {
     let input = (event.target as HTMLInputElement).value;
-    const search = this.datosService.getOnlyMateriales().filter(row=>String(row.nombre).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(input));
+    const search = this.datosService.getOnlyMateriales().filter(row=>String(row.nombre).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(input.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
     this.table = search.length > 0?search:this.datosService.getOnlyMateriales();
   }
-  // busca por material
+  // busca por medida
   materialSearch(event:Event) {
     let input = (event.target as HTMLInputElement).value;
-    const search = this.datosService.getOnlyMateriales().filter(row=>String(row.medida).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(input));
+    const search = this.datosService.getOnlyMateriales().filter(row=>String(row.medida).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(input.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
     this.table = search.length > 0?search:this.datosService.getOnlyMateriales();
   }
   
