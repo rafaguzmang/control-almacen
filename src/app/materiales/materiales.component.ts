@@ -12,12 +12,14 @@ import { DatosService } from '../services/datos.service';
 export class MaterialesComponent implements OnInit{
   
   table:any [] = [];
-
+  
   // Variables para criterios de busqueda
   private concepto:string = '';
   private material:string = '';
   private medidaCompleta:string ='';
   private calibre:string = '';
+  private criterio:string = '';
+  private medida:string = '';
   
   // Variables para la configuración de máximos y mínimos
   btnconfigcolor:string = "";
@@ -29,35 +31,43 @@ export class MaterialesComponent implements OnInit{
     private datosService:DatosService,
     private cdr: ChangeDetectorRef
   ){} 
-
-  //Busca los items por medida
-  searchFiltroMedida(){
-    let medida = `${this.medidaCompleta}${this.calibre}`;
-    (document.getElementById('materialSearch') as HTMLInputElement).value = medida;
-    const search = this.datosService.getOnlyMateriales().filter(row=>String(row.medida).includes(medida));
-    this.table = search.length > 0?search:this.datosService.getOnlyMateriales();
+  
+  restartSearch() {
+    document.querySelectorAll('#item').forEach(element => (element as HTMLSelectElement).selectedIndex = 0);
+    this.concepto = '';
+    this.material = '';
+    this.medidaCompleta = '';
+    this.calibre = '';
+    this.criterio = '';
+    this.medida = '';
+    this.searchFiltroNombre();
   }
+  
 
   //Busca los items por nombre
   searchFiltroNombre(){
-    let criterio = `${this.concepto} ${this.material}`;
-    (document.getElementById('nombreSearch') as HTMLInputElement).value = criterio;
-    const search = this.datosService.getOnlyMateriales().filter(row=>String(row.nombre).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(criterio.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
-    this.table = search.length > 0?search:this.datosService.getOnlyMateriales();
+    this.criterio = `${this.concepto} ${this.material}`;
+    this.medida = `${this.medidaCompleta}${this.calibre}`;
+    (document.getElementById('nombreSearch') as HTMLInputElement).value = this.criterio;
+    (document.getElementById('materialSearch') as HTMLInputElement).value = this.medida;
+
+    let search = this.datosService.getOnlyMateriales().filter(row=>String(row.nombre).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(this.criterio.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
+    search = search.filter(row=>String(row.medida).includes(this.medida));
+    this.table = search.length > 0?search:[];
   }
   
   // Recibe el calibre a buscar
   searchMedidaCalibreInputFiltro(event:Event) {    
     const input = event.target as HTMLSelectElement;    
     this.calibre = (input.options[input.selectedIndex].textContent??'');
-    this.searchFiltroMedida();
+    this.searchFiltroNombre();
   }
 
   // Recibe la medida a buscar
   searchMedidaCompletaInputFiltro(event:Event) {    
     const input = event.target as HTMLSelectElement;    
     this.medidaCompleta = (input.options[input.selectedIndex].textContent??'');
-    this.searchFiltroMedida();
+    this.searchFiltroNombre();
   }
   // Recibe el tipo de material a buscar (Acero al carbón,Inoxidable..)
   searchMaterialInputFiltro(event:Event) {    
@@ -76,19 +86,19 @@ export class MaterialesComponent implements OnInit{
   codigoSearch(event:Event) {
     let input = (event.target as HTMLInputElement).value;
     let search = this.datosService.getOnlyMateriales().filter(row=>String(row.id).includes(input));
-    this.table = search.length > 0?search:this.datosService.getOnlyMateriales();
+    this.table = search.length > 0?search:[];
   }
   // busca por nombre
   nombreSearch(event:Event) {
     let input = (event.target as HTMLInputElement).value;
     const search = this.datosService.getOnlyMateriales().filter(row=>String(row.nombre).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(input.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
-    this.table = search.length > 0?search:this.datosService.getOnlyMateriales();
+    this.table = search.length > 0?search:[];
   }
   // busca por medida
   materialSearch(event:Event) {
     let input = (event.target as HTMLInputElement).value;
     const search = this.datosService.getOnlyMateriales().filter(row=>String(row.medida).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(input.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
-    this.table = search.length > 0?search:this.datosService.getOnlyMateriales();
+    this.table = search.length > 0?search:[];
   }
   
   // Botón de configuración para mínimos y máximos
