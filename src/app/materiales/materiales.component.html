@@ -1,12 +1,79 @@
-<div class="container main">
+<div class="container-fluid main">
     <button class="btn btn-primary m-1 fa-solid fa-gear" [style.backgroundColor]="btnconfigcolor" (click)="minimoBtn()"></button>        <table class="table table-striped"></table>
-    <div class="container ">
-        <table class="table table-striped w-100">
-            <thead class="table-primary text-white w-100">
-                <tr class="border border-dark w-100">
-                    <th class="text-center width-5">Código</th>
-                    <th class="width-20">Nombre</th>
-                    <th class="width-20">Medida</th>
+    <div class="container-fluid d-flex">
+        <div class="col-2 " >
+            <aside class="row bg-secondary text-center mx-1 p-1">
+                <div class="row ">
+                    <h3>Filtros</h3>
+                </div>
+                <div class="row text-white " style="text-align: left;">
+                    <label for="item">Tipo:</label>
+                    <select name="Item" id="item" (input)="searchConceptoInputFiltro($event)">
+                        <option value=""></option>
+                        <option value="lamina">Lámina</option>
+                        <option value="perfil">Perfil</option>
+                        <option value="perfil">P.T.R.</option>
+                        <option value="perfil">I.P.R</option>
+                        <option value="tubos">Tubo</option>
+                        <option value="angulos">Ángulo</option>
+                        <option value="solera">Solera</option>
+                        <option value="varilla">Varilla</option>
+                        <option value="canal">Canal</option>                                                                        
+                    </select>                    
+                </div>
+                <div class="row text-white " style="text-align: left;">
+                    <label for="item">Material:</label>
+                    <select name="Item" id="item" (input)="searchMaterialInputFiltro($event)">
+                        <option value=""></option>
+                        <option value="Acero al carbón">Acero al carbón</option>
+                        <option value="Inoxidable">Inoxidable</option>
+                        <option value="Galvanizado">Galvanizado</option>
+                        <option value="Aluminio">Aluminio</option>                                                                                        
+                    </select>                    
+                </div>
+                <div class="row text-white " style="text-align: left;">
+                    <label for="item">Calibre:</label>
+                    <select name="Item" id="item" (input)="searchMedidaCalibreInputFiltro($event)">
+                        <option value=""></option>
+                        <option value="@14">&#64; 10</option>
+                        <option value="@14">&#64; 11</option>
+                        <option value="@14">&#64; 12</option>
+                        <option value="@14">&#64; 14</option>
+                        <option value="@14">&#64; 16</option>
+                        <option value="@14">&#64; 18</option>
+                        <option value="@14">&#64; 20</option>
+                        <option value="@14">&#64; 22</option>
+                        <!-- Placa -->
+                        <option value="@14">&#64; 1/8</option>
+                        <option value="@14">&#64; 3/16</option>
+                        <option value="@14">&#64; 1/4</option>
+                        <option value="@14">&#64; 3/8</option>
+                        <option value="@14">&#64; 1/2</option>
+                        <option value="@14">&#64; 5/8</option>
+                        <option value="@14">&#64; 3/4</option>
+                        <option value="@14">&#64; 7/8</option>
+                        
+                    </select>                    
+                </div>
+                <div class="row text-white " style="text-align: left;">
+                    <label for="item">Medidas:</label>
+                    <select name="Item" id="item" (input)="searchMedidaCompletaInputFiltro($event)">
+                        <option value=""></option>
+                        <option value="120x48">120.0 x 48.0</option>
+                        <option value="tubo">,236.0</option>
+                    </select>                    
+                </div>
+            </aside>
+        </div>
+        <!-- Tabla de materiales -->
+        <div class="col">
+
+            <table class="table table-striped w-100">
+                <thead class="table-primary text-white w-100">
+                    <tr class="border border-dark w-100">
+                        <th class="text-center width-5">Código</th>
+                        <th class="width-20">Nombre</th>
+                        <th class="width-20">Medida</th>
                     <th class="text-center width-5" [hidden]="btnconfigcolor===''">Mínimo</th>
                     <th class="text-center width-5" [hidden]="btnconfigcolor===''">Máximo</th>
                     <th class="text-center width-5">Cantidad</th>
@@ -17,13 +84,13 @@
             <tbody class="w-100">
                 <tr class="w-100">
                     <td>
-                        <input type="number" min="0" class="w-100" (input)="codigoSearch($event)">
+                        <input type="number" min="0" class="w-100" id="codigoSearch" (input)="codigoSearch($event)">
                     </td>
                     <td>
-                        <input type="text" class="w-100" (input)="nombreSearch($event)">
+                        <input type="text" class="w-100" id="nombreSearch" (input)="nombreSearch($event)">
                     </td>
                     <td>
-                        <input type="text" class="w-100" (input)="materialSearch($event)">
+                        <input type="text" class="w-100" id="materialSearch" (input)="materialSearch($event)">
                     </td>
                     <td [hidden]="btnconfigcolor===''"></td>
                     <td [hidden]="btnconfigcolor===''"></td>
@@ -55,7 +122,9 @@
                     </tr>
                 }
             </tbody>
-        </table>
+            </table>
+        </div>
+
     </div>
 
 </div>
