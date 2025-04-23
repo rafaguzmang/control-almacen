@@ -10,6 +10,8 @@
             <th class="text-center"><i class="fa-solid fa-clipboard-check"></i></th>
             <th class="stock-tabla-h">Stock</th>
             <th>Cantidad</th>
+            <th>Apartado</th>
+            <th>Requerido</th>
             <th>Entregado</th>
            </tr>
         </thead>
@@ -33,6 +35,8 @@
                 <td></td>
                 <td></td>
                 <td></td>
+                <td></td>
+                <td></td>
                 
            </tr>
             @for (item of material; track item.numero){                
@@ -51,6 +55,8 @@
                     </td>
                     <!-- Se pone la cantidad entregada a producción -->
                     <td class="centrar_columna">{{item.cantidad}}</td>                
+                    <td class="centrar_columna">{{item.apartado}}</td>                
+                    <td class="centrar_columna">{{item.requerido}}</td>                
                     <td class="entregado">
                         <div class="d-inline-flex p-3 ">
                             <input type="number" min="0" value={{item.cantidad}} class="me-1" style="width: 10%;"  [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" >
