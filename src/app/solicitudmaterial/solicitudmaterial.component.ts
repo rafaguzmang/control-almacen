@@ -209,6 +209,7 @@ export class SolicitudmaterialComponent implements OnInit{
   }
   // Buscador por orden de trabajo
   searchOT(){
+    console.log(this.ordensch);
     let searchTable:any = [];
     this.material = this.dataMat.getMaterial(); 
     searchTable = this.dataMat.getMaterial();
@@ -222,8 +223,6 @@ export class SolicitudmaterialComponent implements OnInit{
     let searchTable:any = [];
     this.material = this.dataMat.getMaterial(); 
     searchTable = this.dataMat.getMaterial();
-    console.log("Busca");
-
     let search = searchTable.filter((filter:any) => String(filter.codigo).match(this.codigosch))
     search = search.sort((a:any,b:any)=>a.codigo - b.codigo)
     this.material = search.length > 0 ? search : null;
@@ -275,10 +274,14 @@ export class SolicitudmaterialComponent implements OnInit{
           // Carga la tabla local con la información desde el service
           this.material = this.dataMat.getMaterial();   
           this.route.queryParams.subscribe(params=> {
-            this.ordensch=params['orden'];
-            this.ordensch?this.searchOT():null;
+            console.log("param",this.codigosch); 
+            if(this.codigosch === ''){
+              this.ordensch=params['orden']!==undefined?params['orden']:this.ordensch;              
+              this.searchOT();
+            }else{
+              this.searchCodigo(); 
+            }           
           })
-          this.searchCodigo(); 
         })
       })
     );       
