@@ -7,7 +7,7 @@ import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 })
 export class OdooJsonRpcService {
 
-  private odooUrl = 'http://dtmindustry.ddns.net:8069/jsonrpc'; // URL del endpoint JSON-RPC de Odoo
+  private odooUrl = 'http://localhost:8069/jsonrpc'; // URL del endpoint JSON-RPC de Odoo
   private dataSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   public data$: Observable<any> = this.dataSubject.asObservable();
   

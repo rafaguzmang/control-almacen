@@ -24,7 +24,7 @@ export class SolicitudmaterialComponent implements OnInit{
   // Metodo para leer items especificos
   readItem(uid:number,codigo:number,orden:number):Observable <any[]>{
     return new Observable(observer => {
-        this.odooConect.read(uid,[['id','=',codigo]],'dtm.diseno.almacen',['id','apartado','disponible'],0).subscribe(almacen=>{
+        this.odooConect.read(uid,[['id','=',codigo]],'dtm.materiales',['id','apartado','disponible'],0).subscribe(almacen=>{
           this.getModelId(uid,orden).subscribe(model_id=>{
             this.odooConect.read(uid,[['model_id','=',model_id[0].id],['materials_list','=',codigo]],'dtm.materials.line',['id','materials_availabe','materials_required'],1).subscribe(complete=>{
               const result = [
@@ -55,9 +55,17 @@ export class SolicitudmaterialComponent implements OnInit{
   // Si hay material sobrante se inserta en las demas ordenes que lo soliciten
   apartadosFunc(uid:number,codigo:number,stock:number,firstId:number){
     // Lee de la lista de materiales de las ordenes aquellas que en requerido sea diferente de cero
-    this.odooConect.read(uid,[['materials_list','=',codigo]],'dtm.materials.line',['id','materials_required','materials_availabe','materials_cuantity'],0).subscribe(result=>{      
+
+    this.odooConect.read(uid,[['materials_list','=',codigo],['revision','!=',true]],
+      'dtm.materials.line',
+      [
+        'id','materials_required',
+        'materials_availabe',
+        'materials_cuantity'
+      ],0).subscribe(result=>{      
       let apartados = result.reduce((total:number,cantidad:any) => total + cantidad.materials_availabe,0);
       let disponibles = (stock - apartados)>0?stock-apartados:0;
+      console.log('result',result);
       // let newList = result.filter((filter:any) => filter.materials_required !== 0)
       // let itemList:any = [];
       // if(disponibles > 0){
@@ -81,18 +89,24 @@ export class SolicitudmaterialComponent implements OnInit{
           }
           // itemList.push(material);
         }
-        // console.log("itemList",itemList);
+      console.log("length",result.length);
       // }
-      this.odooConect.update(uid,codigo,'dtm.diseno.almacen',{'cantidad':stock,'apartado':stock-disponibles<0?0:stock-disponibles,'disponible':disponibles}).subscribe(()=>{
-        result.forEach((element:any) => { 
-          this.odooConect.update(uid,element.id,'dtm.materials.line',{'materials_required':element.materials_required,
-            'materials_availabe':element.materials_availabe,'materials_inventory':stock,'almacen':true}).subscribe(()=>{              
-              this.fetchodooConect();
-              // this.searchCodigo(); 
-          });                    
-        });
-        
-      })    
+      if (result.length>0){
+        this.odooConect.update(uid,codigo,'dtm.diseno.almacen',{'cantidad':stock,'apartado':stock-disponibles<0?0:stock-disponibles,'disponible':disponibles}).subscribe(()=>{
+          console.log('object');
+          result.forEach((element:any) => { 
+            console.log('foreach');
+            this.odooConect.update(uid,element.id,'dtm.materials.line',{'materials_required':element.materials_required,
+              'materials_availabe':element.materials_availabe,'materials_inventory':stock,'almacen':true}).subscribe(()=>{              
+                this.fetchodooConect();
+                // this.searchCodigo(); 
+            });                    
+          });        
+        })    
+      }else{
+        this.fetchodooConect();
+      }
+      
     })
   }
 
@@ -105,7 +119,6 @@ export class SolicitudmaterialComponent implements OnInit{
       // Obtiene el id, apartado,stock y disponible del item en cuestión
       this.readItem(uid,codigo,orden).subscribe(result=>{
         const itemData = {codigo:result[0],apartados:result[1],disponible:result[2],stock:stock,model_id:result[3],id:result[4],apartado:result[5],requerido:result[6]}
-        // console.log(itemData);
         // Hace el cálculo correspondiente del material disponible vs el solicitado
         let apartado = itemData.apartado;
         let requerido = itemData.requerido;
@@ -249,7 +262,7 @@ export class SolicitudmaterialComponent implements OnInit{
       // Lee la lista de materiales de todas las ordenes
       this.odooConect.read(uid,[['model_id','!=',false]],'dtm.materials.line', ['materials_list','nombre','medida', 'materials_cuantity',
         'materials_inventory','materials_availabe', 'materials_required','entregado','recibe','notas','almacen','model_id'],0).subscribe(ordenes =>{  
-          // console.log(ordenes);      
+          console.log('Update');      
           // Se crea una tabla para agregar todos los datos necesarios
           ordenes.forEach((row:any) =>{
           material.push({'numero':num++,'orden':Number(row.model_id[1]),'codigo':row.materials_list[0],'nombre':row.nombre,
