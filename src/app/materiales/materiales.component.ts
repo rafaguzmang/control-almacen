@@ -143,8 +143,8 @@ export class MaterialesComponent implements OnInit{
 
 
   ngOnInit(): void {
-  //  this.fetchAll();
-  //  this.checkMinMat();
+   this.fetchAll();
+   this.checkMinMat();
   }
 
 }
