@@ -80,6 +80,7 @@ export class HomeComponent implements OnInit {
   }
   
   ngOnInit(): void {
+    this.fetchAll(); 
     this.ngzone.runOutsideAngular(()=>{
       setInterval(() => {
         this.ngzone.run(()=>{
