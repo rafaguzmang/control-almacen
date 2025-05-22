@@ -24,87 +24,23 @@ export class SolicitudmaterialComponent implements OnInit{
   constructor(private odooConect:OdooJsonRpcService, private dataMat:DatosService,private route:ActivatedRoute){}
 
 
-  updateData(uid:number,id:number,modelo:string,val:any){
-    this.odooConect.update(uid,id,'dtm.diseno.almacen',val).subscribe()
-  }
-  // Si hay material sobrante se inserta en las demas ordenes que lo soliciten
-  apartadosFunc(uid:number,codigo:number,stock:number,firstId:number){
-    // Lee de la lista de materiales de las ordenes aquellas que en requerido sea diferente de cero
-
-    this.odooConect.read(uid,[      
-        ['materials_list', '=', codigo],      
-        ['revision', '!=', true],
-        ['entregado', '!=', true]      
-      ],
-      'dtm.materials.line',
-      [
-        'id','materials_required',
-        'materials_availabe',
-        'materials_cuantity'
-      ],0).subscribe(result=>{      
-      let apartados = result.reduce((total:number,cantidad:any) => total + cantidad.materials_availabe,0);
-      let disponibles = (stock - apartados)>0?stock-apartados:0;
-      console.log('Primer',disponibles);
-      // let newList = result.filter((filter:any) => filter.materials_required !== 0)
-      // let itemList:any = [];
-      // if(disponibles > 0){
-        for(let material of result){
-            if(disponibles == 0 && material.id != firstId ){
-              material.materials_required = material.materials_cuantity;
-              material.materials_availabe = 0;                  
-              console.log('Cero');
-              console.log("disponibles",disponibles);
-            } 
-        }
-        for(let material of result){  
-          if(material.id != firstId && material.materials_required > 0){  //Si el material disponible es cero no se efectua el loop
-            console.log(material.id);          
-           
-            if (material.materials_required == disponibles && disponibles > 0) { //Si el material es requerido es igual al disponible se deja de ejecutar el loop
-              material.materials_required = 0;
-              material.materials_availabe = material.materials_availabe + disponibles;
-              disponibles = 0; 
-              console.log('Igual');
-              console.log("disponibles",disponibles);
-              break;            
-            }  else if(material.materials_cuantity > disponibles){ //Si el disponible es menor que el que lo solicitado este se resta y se deja de ejecutar el loop
-              material.materials_required = (material.materials_cuantity - disponibles)>0?material.materials_cuantity - disponibles:0;
-              material.materials_availabe = disponibles;
-              disponibles = 0;
-              console.log('Hay poquito');
-              console.log("disponibles",disponibles);
-              break;
-            } else if(material.materials_cuantity < disponibles){//Si el material disponible es mayor al solicitado este se inyecta y se continua el loop
-              material.materials_required = 0;
-              material.materials_availabe = material.materials_cuantity;
-              disponibles = disponibles - material.materials_cuantity;
-              console.log('Si hay');
-              console.log("disponibles",disponibles);
-            }  
-          }
-          // itemList.push(material);
-          // console.log("disponibles",disponibles);
-        }
-      // }
-      if (result.length>0){
-        this.odooConect.update(uid,codigo,'dtm.diseno.almacen',{'cantidad':stock,'apartado':stock-disponibles<0?0:stock-disponibles,'disponible':disponibles}).subscribe(()=>{
-          // console.log('object');
-          result.forEach((element:any) => { 
-            // console.log('foreach');
-            this.odooConect.update(uid,element.id,'dtm.materials.line',{'materials_required':element.materials_required,
-              'materials_availabe':element.materials_availabe,'materials_inventory':stock}).subscribe(()=>{              
-                this.fetchodooConect();
-                // this.searchCodigo(); 
-            });                    
-          });        
-        })    
-      }else{
-        this.fetchodooConect();
-      }
-      
+  // updateData(uid:number,id:number,modelo:string,val:any){
+  //   this.odooConect.update(uid,id,'dtm.diseno.almacen',val).subscribe()
+  // }
+  
+  almacenEntregado(event:Event){
+    let cantidad = Number((event.target as HTMLInputElement).value);
+    let codigo = Number((event.target as HTMLInputElement).closest('tr')?.children[2].textContent);
+    let orden = Number((event.target as HTMLInputElement).closest('tr')?.children[0].textContent);
+    let version = Number((event.target as HTMLInputElement).closest('tr')?.children[1].textContent);
+    let id = this.dataMat.getMaterial().find(row => row.codigo == codigo && row.orden == orden && row.version == version).id
+    console.log(id);
+    this.odooConect.authenticate().pipe(
+      switchMap(uid=> this.odooConect.update(uid,id,'dtm.materials.line',{'cant_entregada':cantidad}))
+    ).subscribe(()=>{
+       
     })
   }
-
   almacenFNC(event:Event) {
     let stock = Number((event.target as HTMLInputElement).value);
     let codigo = Number((event.target as HTMLInputElement).closest('tr')?.children[2].textContent);
@@ -220,11 +156,12 @@ export class SolicitudmaterialComponent implements OnInit{
         this.dataMat.setMaterial(newTabla);
         this.material = this.dataMat.getMaterial();
        
-        if(this.ordensch){
-          this.searchOT;
+        if(this.ordensch ){
+          this.searchOT();
         }else{
           this.searchCodigo();          
         }
+
         return {result,tablaMateriales,apartados}
       }),     
       
@@ -252,94 +189,74 @@ export class SolicitudmaterialComponent implements OnInit{
   exitenciaCBX(event:Event) {
     let input = event.target as HTMLInputElement;
     let rowTable = input.parentElement?.parentElement;  
-    let orden = (rowTable?.children[0] as HTMLAnchorElement).textContent;
-    let codigo = (rowTable?.children[1] as HTMLAnchorElement).textContent;
+    let orden = Number((rowTable?.children[0] as HTMLAnchorElement).textContent);
+    let version = Number((rowTable?.children[1] as HTMLAnchorElement).textContent);
+    let codigo = Number((rowTable?.children[2] as HTMLAnchorElement).textContent);
+    let cantidad = Number((rowTable?.children[8] as HTMLAnchorElement).textContent);
     // Informa a ingeniería que ya reviso este item
-    if(input.checked){
+    
         this.odooConect.authenticate().pipe(
-        // Busca el número de orden al que esta asociado el material
-        switchMap(uid=> this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id','revision_ot'],1).pipe(
-            map((ordenId:any[])=>{              
-              return {uid,ordenId}
-            })
-          ) 
-        ),
-        // Con el número de orden y el código encuentral el id de la tabla dtm.materiales.line para hacer la actualización
-        switchMap(({uid,ordenId}) =>           
-          this.odooConect.read(uid,[['model_id','=',Number(ordenId[0].id)],['materials_list','=',Number(codigo)]],'dtm.materials.line',['id'],0).pipe(
-            map((material:any[]) => {
-              return {uid,material}
-            })  
-          )
-        ),
-        // Actualiza el item
-        switchMap(({uid,material})=>{
-          return this.odooConect.update(uid,Number(material[0].id),'dtm.materials.line',{'almacen':true});
+        
+        map(uid => {
+          let rowId = this.dataMat.getMaterial().find(row=> row.codigo == codigo && row.orden == orden && row.version == version && row.cantidad == cantidad).id
+          return {uid,rowId}
         }),
-        // Lanza error si la comunicación no se realizó
+        switchMap(({uid,rowId})=> this.odooConect.update(uid,rowId,'dtm.materials.line',{'almacen':input.checked}).pipe(
+            map(()=>{return ''})
+          )
+        ),      
         catchError(error => {
           alert(`Fallo de comunicación: ${error}`);
           return of([]); 
-      })      
-      ).subscribe(result=>console.log(result));
+        })      
+      ).subscribe(result=>console.log(input.checked));
 
-    }else{
-      this.odooConect.authenticate().subscribe((uid:number)=>{
-        this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],1).subscribe(result=>{
-          // console.log(result[0].id,Number(codigo));
-          this.odooConect.read(uid,[['model_id','=',Number(result[0].id)],['materials_list','=',Number(codigo)]],'dtm.materials.line',['id'],0).subscribe(id =>{
-            // console.log(id[0].id);
-            this.odooConect.update(uid,Number(id[0].id),'dtm.materials.line',{'almacen':false}).subscribe()
-          })
-        })
-      })
-    }
+    
   }
   // Botón para entregar el material a producción
   entregado(event: Event ):void {
     let rowTable = (event.target as HTMLInputElement).closest('tr');  
-    let orden = rowTable?.children[0].textContent;
-    let codigo = rowTable?.children[1].textContent??'0';
-    let cantidad = rowTable?.children[6].textContent??'0';
-    let entregado = rowTable?.children[9].children[0].children[0] as HTMLInputElement;
-    let recibe =  rowTable?.children[9].children[0].children[1] as HTMLSelectElement;
-    // console.log(orden,codigo,cantidad,entregado,recibe);
-    this.odooConect.authenticate().subscribe((uid: number) => {
-      if(uid == 2){
-        this.odooConect.read(uid,[['ot_number','=',orden]],'dtm.odt',['id'],this.limit).subscribe(ordenData =>{ //Obtiene el número de orden
-          // console.log(ordenData[0].id);
-          this.odooConect.read(uid,[['model_id','=',ordenData[0].id],['materials_list','=',parseInt(codigo)]],'dtm.materials.line',['id','materials_availabe'],this.limit).subscribe(ordenId =>{ //Obtiene el id del material en cuestión
-            // console.log(ordenId[0].id,ordenId[0].materials_availabe);          
-            this.odooConect.update(uid,ordenId[0].id,'dtm.materials.line',{'entregado':true,'recibe':recibe.options[recibe.selectedIndex].text}).subscribe(()=> //Actualiza el material
-              {
-                // let newTable:any = this.dataMat.getMaterial();
-                // newTable.forEach((iterator:any) =>{
-                //   if(iterator.codigo === Number(codigo)){
-                //     iterator.entregado = true;
-                //     iterator.recibe = recibe.options[recibe.selectedIndex].text;
-                //   }
-                // })
-                // this.dataMat.setMaterial(newTable);
-
-                this.odooConect.read(uid,[['id','=',parseInt(codigo)]],'dtm.diseno.almacen',['apartado','cantidad'],this.limit).subscribe(apartado =>{
-                  // console.log(apartado[0].apartado, ordenId[0].materials_availabe)
-                  let apartadoMaterial = apartado[0].apartado - ordenId[0].materials_availabe;
-                  let cantidadMaterial = apartado[0].cantidad-parseInt(entregado.value);                 
-                  // console.log(cantidadMaterial,apartadoMaterial)
-                  this.odooConect.update(uid,parseInt(codigo),'dtm.diseno.almacen',{'cantidad':Math.max(cantidadMaterial,0),'apartado':Math.max(apartadoMaterial,0),'disponible':Math.max(cantidadMaterial-apartadoMaterial,0) }).subscribe(()=>{
-                    this.fetchodooConect();
-                  });              
-                 
-                })
-              }
-            );
-           
-          })    
-        });
-        alert("Listo!!");
+    let version = Number(rowTable?.children[1].textContent??'0');
+    let orden = Number(rowTable?.children[0].textContent);
+    let codigo = Number(rowTable?.children[2].textContent??'0');
+    let stock = Number(rowTable?.children[6].textContent??'0');
+    let proyectado = Number(rowTable?.children[7].textContent??'0');
+    let entregado = Number(rowTable?.children[11].children[0].children[0] as HTMLInputElement);
+    let recibe =  rowTable?.children[11].children[0].children[1] as HTMLSelectElement;
+    let id = this.dataMat.getMaterial().find(row => row.codigo == codigo && row.orden == orden && row.version == version).id
+    this.odooConect.authenticate().pipe(      
+      switchMap(uid=> this.odooConect.update(uid,id,'dtm.materials.line',{'entregado':true,'recibe':recibe.options[recibe.selectedIndex].text}).pipe(
+            map(()=>{return uid})
+          )
+      ), 
+      switchMap((uid)=> this.odooConect.update(uid,codigo,'dtm.materiales',{'cantidad':Math.max(stock - entregado,0),'apartado':Math.max(proyectado - entregado,0),'disponible':Math.max((stock - entregado)-(proyectado - entregado),0) }).pipe(
+            map(()=>{return uid})
+          )
+      ), 
+      switchMap((uid)=> this.odooConect.update(uid,id,'dtm.materials.line',{'cant_entregada':entregado}).pipe(
+            map(()=>{return uid})
+          )
+      ), 
+      catchError(error => {
+          alert(`Fallo de comunicación: ${error}`);
+          return of([]); 
+        })   
       
-      }
-    });  
+    ).subscribe(()=>{
+       this.dataMat.getMaterial().find(row => {
+         if(row.id == id){
+            console.log(row);
+            row.entregado = true;
+          }
+        })
+        if(this.ordensch ){
+          this.searchOT();
+        }else{
+          this.searchCodigo();          
+        }
+    })
+      
+     
   }
   // Buscador por orden de trabajo
   searchOT(){
@@ -414,6 +331,7 @@ export class SolicitudmaterialComponent implements OnInit{
             'almacen',
             'model_id',
             'revision',            
+            'cant_entregada',            
           ],
           0
         ).pipe(map((ordenes:any[])=>{
@@ -453,6 +371,7 @@ export class SolicitudmaterialComponent implements OnInit{
             'requerido':row.materials_required,
             'proyectado':0,
             'revision':row.revision,
+            'yaentregada': row.cant_entregada
           })
         }) 
       //   // Lee todo el inventario para poder agregar el stock cargado en sistema
