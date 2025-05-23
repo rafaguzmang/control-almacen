@@ -2,6 +2,8 @@ import { Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
+import { catchError, map, of, switchMap } from 'rxjs';
+import { runPostSignalSetFn } from '@angular/core/primitives/signals';
 
 @Component({
   selector: 'app-home',
@@ -43,16 +45,81 @@ export class HomeComponent implements OnInit {
   }
   
   firmaBTN(event:Event) {
-    let id = (event.target as HTMLInputElement).closest("tr")?.children[0].textContent
-    this.odooservice.authenticate().subscribe((uid:number)=>{
-      this.odooservice.read(uid,[['ot_number','=',Number(id)]],'dtm.odt',['id'],1).subscribe((result:any)=>{
-        this.odooservice.update(uid,Number(result[0].id),'dtm.odt',
-        {'firma_almacen':'almacen@dtmindustry.com','almacen_rev':false}).subscribe(done=>{
-          console.log(done)
-          this.fetchAll();
-        })
+    let id = Number((event.target as HTMLInputElement).closest("tr")?.children[0].textContent);
+    let version = Number((event.target as HTMLInputElement).closest("tr")?.children[1].textContent);
+    let uid = 0;
+    let ordenId = 0;
+    let disenador = '';
+    let tipo_orden = '';    
+    let servicio = false;
+    console.log(id,version);
+    this.odooservice.authenticate().pipe(
+      switchMap(uidR => this.odooservice.read(uidR,[['ot_number','=',id],['revision_ot','=',version]],'dtm.odt',['id','disenador','tipe_order'],1).pipe(
+          map(result => {
+            uid = uidR;
+            disenador = result[0].disenador;
+            tipo_orden = result[0].tipe_order;
+            ordenId = result[0].id;
+            console.log(tipo_orden);
+            return result
+          })
+        )
+      ),
+      switchMap(result => 
+        this.odooservice.read(uid,
+          [
+            ['model_id','=',result[0].id]
+          ],
+            'dtm.materials.line',
+          [
+            'id','materials_list','materials_required','almacen','revision','entregado'
+          ],
+          0
+        ).pipe(
+          map((result:any) => {
+            result = result.filter((iterator:any) => iterator.almacen == true &&  iterator.entregado != true && iterator.materials_required > 0 && iterator.revision == false);  
+            result.forEach((item:any) => 
+              this.odooservice.create(
+                uid,
+                'dtm.compras.requerido',
+                {
+                  'orden_trabajo':id,
+                  'revision_ot':version,
+                  'disenador':disenador=='garcia'?'Luis':'Andrés',
+                  'servicio':servicio,
+                  'codigo':item.materials_list[0],
+                  'nombre':item.materials_list[1],
+                  'cantidad':item.materials_required,
+                  'tipo_orden':tipo_orden
+                }
+              ).pipe(
+                switchMap(()=>  this.odooservice.update(uid,item.id ,'dtm.materials.line',{'revision':true})
+              )
+              ).subscribe(result=>console.log('dtm.compras.requerido',result))            
+            );
+            return result
+          })
+        )
+      ),
+      switchMap(()=> 
+        this.odooservice.update(uid,ordenId,'dtm.odt',
+        {'firma_almacen':'almacen@dtmindustry.com','almacen_rev':false}).pipe(
+         map(result=>console.log('almacen@dtmindustry.com',result)) 
+        )
+      ),
+      catchError(error=>{
+        console.log(error);
+        return of([])
       })
-    })
+    ).subscribe(result=> 
+      {
+        console.log(result);
+        
+        this.fetchAll();
+       
+      })
+
+  
   }
 
   // Obtiene la orden para buscarla en el modulo de Ordenes
@@ -63,7 +130,7 @@ export class HomeComponent implements OnInit {
 
   fetchAll(){
     this.odooservice.authenticate().subscribe((uid:number)=>{
-      this.odooservice.read(uid,[['almacen_rev','=','true']],'dtm.odt',['id','ot_number','disenador','date_disign_finish'],0).subscribe((result:any)=>{
+      this.odooservice.read(uid,[['almacen_rev','=','true']],'dtm.odt',['id','ot_number','revision_ot','disenador','date_disign_finish'],0).subscribe((result:any)=>{
         this.datosservice.setOrdenes(result);
         this.tabla = this.datosservice.getOrdenes();
       })

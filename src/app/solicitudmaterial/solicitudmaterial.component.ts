@@ -274,7 +274,7 @@ export class SolicitudmaterialComponent implements OnInit{
     let searchTable:any = [];
     this.material = this.dataMat.getMaterial(); 
     searchTable = this.dataMat.getMaterial();
-    let search = searchTable.filter((filter:any) => String(filter.codigo).match(this.codigosch))
+    let search = searchTable.filter((filter:any) => String(filter.codigo) == this.codigosch)
     search = search.sort((a:any,b:any)=>a.codigo - b.codigo)
     this.material = search.length > 0 ? search : null;
     this.material = !this.codigosch ? this.dataMat.getMaterial() : this.material;

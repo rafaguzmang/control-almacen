@@ -7,6 +7,7 @@
                   <thead>
                     <tr >
                       <th >#</th>
+                      <th >Ver.</th>
                       <th >Solicitante</th>
                       <th >Fecha</th>        
                       <th >Confirmar</th>        
@@ -16,6 +17,7 @@
                     @for (item of tabla; track item.id) {
                       <tr (click)="rowSelected($event)">
                         <td>{{item.ot_number}}</td>
+                        <td>{{item.revision_ot}}</td>
                         <td>{{item.disenador}}</td>
                         <td>{{item.date_disign_finish}}</td>
                         <td class="text-center">
