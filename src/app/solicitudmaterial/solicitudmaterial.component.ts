@@ -4,6 +4,7 @@ import { DatosService } from '../services/datos.service';
 import { ActivatedRoute } from '@angular/router';
 import { catchError, map, Observable, of, Subscriber, switchMap, tap } from 'rxjs';
 import { get } from 'node:http';
+import e from 'express';
 
 @Component({
   selector: 'app-solicitudmaterial',
@@ -17,9 +18,11 @@ export class SolicitudmaterialComponent implements OnInit{
   empleados:any [] = [];
   limit:number = 10;
   ordensch:number = 0;
-  codigosch:string = '';
+  codigosch:number = 0;
   cliente: string = '';
   proyecto: string = '';
+  private timer:any;
+  ngzone: any;
   
   constructor(private odooConect:OdooJsonRpcService, private dataMat:DatosService,private route:ActivatedRoute){}
 
@@ -34,20 +37,29 @@ export class SolicitudmaterialComponent implements OnInit{
     let orden = Number((event.target as HTMLInputElement).closest('tr')?.children[0].textContent);
     let version = Number((event.target as HTMLInputElement).closest('tr')?.children[1].textContent);
     let id = this.dataMat.getMaterial().find(row => row.codigo == codigo && row.orden == orden && row.version == version).id
-    console.log(id);
+    // console.log(id);
     this.odooConect.authenticate().pipe(
       switchMap(uid=> this.odooConect.update(uid,id,'dtm.materials.line',{'cant_entregada':cantidad}))
     ).subscribe(()=>{
        
     })
   }
-  almacenFNC(event:Event) {
+  almacenFNC(event:Event) {    
+    clearTimeout(this.timer);
+    
+    this.timer = setTimeout(() => {
+      this.calculadorAlmacen(event);
+    },800)
+     
+  }
+
+  calculadorAlmacen(event:Event){
     let stock = Number((event.target as HTMLInputElement).value);
     let codigo = Number((event.target as HTMLInputElement).closest('tr')?.children[2].textContent);
     let orden = Number((event.target as HTMLInputElement).closest('tr')?.children[0].textContent);
     let version = Number((event.target as HTMLInputElement).closest('tr')?.children[1].textContent);
     let cantidad = Number((event.target as HTMLInputElement).closest('tr')?.children[8].textContent);
-    console.log(stock,codigo,orden,version,cantidad);
+    // console.log(stock,codigo,orden,version,cantidad);
     this.odooConect.authenticate().pipe(
       // Se obtiene el id del material según almacén cantidad,apartado y disponible  
       switchMap(uid => this.odooConect.read(uid,[['id','=',codigo]],'dtm.materiales',
@@ -62,9 +74,6 @@ export class SolicitudmaterialComponent implements OnInit{
         // let almacenItem = result.almacen[0];
         let selfItem:any={};
         tablaMateriales = tablaMateriales.filter((row:any) => row.codigo == codigo)
-        // console.log("tablaMateriales",tablaMateriales);
-        // console.log("almacenItem",almacenItem);
-
         selfItem = tablaMateriales.find((row:any)=> Number(row.orden)==orden && row.version==version)
 
         let apartado = selfItem.apartado;
@@ -176,14 +185,6 @@ export class SolicitudmaterialComponent implements OnInit{
           })
         ).subscribe(()=>console.log('Listo!!'))
     });
-
-           
-    
-   
-   
-    
-    
-     
   }
   
   exitenciaCBX(event:Event) {
@@ -209,7 +210,7 @@ export class SolicitudmaterialComponent implements OnInit{
           alert(`Fallo de comunicación: ${error}`);
           return of([]); 
         })      
-      ).subscribe(result=>console.log(input.checked));
+      ).subscribe(result=>result);
 
     
   }
@@ -219,11 +220,12 @@ export class SolicitudmaterialComponent implements OnInit{
     let version = Number(rowTable?.children[1].textContent??'0');
     let orden = Number(rowTable?.children[0].textContent);
     let codigo = Number(rowTable?.children[2].textContent??'0');
-    let stock = Number(rowTable?.children[6].textContent??'0');
+    let stock = Number((rowTable?.children[6].children[0] as HTMLInputElement).value);
     let proyectado = Number(rowTable?.children[7].textContent??'0');
-    let entregado = Number(rowTable?.children[11].children[0].children[0] as HTMLInputElement);
+    let entregado = Number((rowTable?.children[11].children[0].children[0] as HTMLInputElement).value);
     let recibe =  rowTable?.children[11].children[0].children[1] as HTMLSelectElement;
     let id = this.dataMat.getMaterial().find(row => row.codigo == codigo && row.orden == orden && row.version == version).id
+    // console.log(stock,entregado);
     this.odooConect.authenticate().pipe(      
       switchMap(uid=> this.odooConect.update(uid,id,'dtm.materials.line',{'entregado':true,'recibe':recibe.options[recibe.selectedIndex].text}).pipe(
             map(()=>{return uid})
@@ -274,7 +276,7 @@ export class SolicitudmaterialComponent implements OnInit{
     let searchTable:any = [];
     this.material = this.dataMat.getMaterial(); 
     searchTable = this.dataMat.getMaterial();
-    let search = searchTable.filter((filter:any) => String(filter.codigo) == this.codigosch)
+    let search = searchTable.filter((filter:any) => Number(filter.codigo) == this.codigosch)
     search = search.sort((a:any,b:any)=>a.codigo - b.codigo)
     this.material = search.length > 0 ? search : null;
     this.material = !this.codigosch ? this.dataMat.getMaterial() : this.material;
@@ -282,14 +284,18 @@ export class SolicitudmaterialComponent implements OnInit{
 
   // Buscador por número de orden
   onOrdenInput(event: Event) {
+    this.codigosch = 0;
+    ((event.target as HTMLInputElement).closest('tr')?.children[2].children[0] as HTMLInputElement).value = '';    
     const input = event?.target as HTMLInputElement;   
     this.ordensch = Number(input.value);    
     this.searchOT();
   }  
   // Buscador por código
   onCodigoInput(event: Event) {
+    this.ordensch = 0;
+    ((event.target as HTMLInputElement).closest('tr')?.children[0].children[0] as HTMLInputElement).value = '';    
     const input = event?.target as HTMLInputElement;  
-    this.codigosch = input.value;
+    this.codigosch = Number(input.value);
     this.searchCodigo();   
   }
   
@@ -313,7 +319,8 @@ export class SolicitudmaterialComponent implements OnInit{
         this.odooConect.read(
           uid,
           [
-            ['model_id','!=',false]
+            ['model_id','!=',false],
+            ['materials_cuantity','!=',0]
           ],
           'dtm.materials.line',
           [ 
@@ -405,7 +412,7 @@ export class SolicitudmaterialComponent implements OnInit{
       this.material = this.dataMat.getMaterial();
       // Obtiene el id mandado desde home para filtrar
       this.route.queryParams.subscribe(params => {
-        if (this.codigosch === '') {
+        if (this.codigosch === 0) {
           this.ordensch = params['orden'] !== undefined ? params['orden'] : this.ordensch;
           this.searchOT();
         } else {
@@ -418,6 +425,18 @@ export class SolicitudmaterialComponent implements OnInit{
   ngOnInit(): void {
     // Obtiene la lista de materiales de todas las ordenes y las guarda en local
     this.fetchodooConect( );
+    
+    // this.ngzone.runOutsideAngular(()=>{
+    //   setInterval(() => {
+    //     this.ngzone.run(()=>{
+    //       this.fetchodooConect();    
+    //     })
+    //   }, 5000);
+    // }) 
+
+
+
+
     // Obtiene la lista de empleados
     this.empleadosList();
    

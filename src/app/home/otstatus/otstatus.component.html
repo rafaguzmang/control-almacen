@@ -1,0 +1,19 @@
+  <div class="table-responsive " style="height: 300px; overflow-y: auto;">
+              <table class="table table-success table-bordered  table-sm">
+                  <thead class="">
+                    <tr >
+                      <th >#</th>
+                      <th >Estatus</th>
+                    
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of tabla; track item.id) {
+                      <tr [class.table-warning] = "item.status != 'corte'">
+                        <td>{{item.orden}}</td>
+                        <td>{{item.status}}</td>                       
+                      </tr>     
+                    }                  
+                  </tbody>
+                </table>
+          </div>

@@ -85,7 +85,7 @@ export class MaterialesComponent implements OnInit{
   // busca por código
   codigoSearch(event:Event) {
     let input = (event.target as HTMLInputElement).value;
-    let search = this.datosService.getOnlyMateriales().filter(row=>String(row.id).includes(input));
+    let search = this.datosService.getOnlyMateriales().filter(row=>row.id == input);
     this.table = search.length > 0?search:[];
   }
   // busca por nombre

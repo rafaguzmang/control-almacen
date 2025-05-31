@@ -1,7 +1,7 @@
 <div class="container-fluid">
     
     <table class="table  table-bordered table-hover table-primary" >
-        <thead class="table-dark">
+        <thead class="table-dark" style="position: sticky;z-index: 1;top: 0;">
            <tr>
             <th class="numero-tabla-h">Orden</th>
             <th class="numero-tabla-h">Ver</th>
@@ -18,7 +18,7 @@
            </tr>
         </thead>
         <tbody>
-            <tr> <!--  Buscador -->
+            <tr style="position: sticky;z-index: 1;top: 40px;"> <!--  Buscador -->
                 <td>
                     <!-- Buscador por número de orden -->
                     <input type="number" min="0" class="input-tabla orden-search" (input)="onOrdenInput($event)" placeholder="Orden" [value]="ordensch !=0 ? ordensch : 0">
@@ -44,7 +44,7 @@
                 
            </tr>
             @for (item of material; track item.numero){                
-                <tr>                    
+                <tr [class.table-info] = "item.revision && !item.entregado" [class.table-success]="item.entregado">                    
                     <td>{{item.orden}}</td>
                     <td>{{item.version}}</td>
                     <td class="codigo_tabla">{{item.codigo}}</td>
@@ -56,7 +56,7 @@
                     </td>
                     <!-- Actualizar almacén y la orden -->
                     <td class="centrar_columna ">
-                        <input class="w-100" type="number" min="0" value="{{item.stock}}" (input)="almacenFNC($event)">
+                        <input class="w-100" type="number" min="0" value="{{item.stock}}" (input)="almacenFNC($event)" [hidden]="item.revision || item.entregado">
                     </td>
                     <td class="centrar_columna">{{item.proyectado}}</td>
                     <!-- Se pone la cantidad entregada a producción -->
@@ -65,7 +65,7 @@
                     <td class="centrar_columna">{{item.requerido}}</td>                
                     <td class="entregado" style="width: 100%;padding: 0;margin: 0;">
                         <div class="d-flex justify-content-center align-items-center py-3" style="width: 100%;padding: 0;margin: 0;">
-                            <input type="number" min="0" class="me-1" style="width: 20%;"  [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" value="{{item.yaentregada}}" (input)="almacenEntregado($event)">
+                            <input type="number" min="0" class="me-1" style="width: 20%;"  [readOnly]="item.entregado" [style.opacity]="item.entregado ? '0.5' : '1'" value="{{item.yaentregada!=0?item.yaentregada:item.cantidad}}" (input)="almacenEntregado($event)">
                             <!-- <label type="text" for="personal" class="me-1 input_text"  [style.opacity]="item.entregado ? '0.5' : '1'" placeholder="Recibe" value="{{item.recibe}}"> -->
                             <select style="padding: 0;margin: 1px;width: 70%" name="personal" id="personal" [style.opacity]="item.entregado ? '0.5' : '1'" >
                                @if(item.recibe){

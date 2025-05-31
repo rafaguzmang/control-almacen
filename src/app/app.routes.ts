@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { InventarioComponent } from './inventario/inventario.component';
 import { ConsumiblesComponent } from './consumibles/consumibles.component';
 import { SolicitudmaterialComponent } from './solicitudmaterial/solicitudmaterial.component';
 import { EntransitoComponent } from './entransito/entransito.component';
@@ -13,7 +12,6 @@ export const routes: Routes = [
     { path: 'consumibles', component: ConsumiblesComponent },
     { path: 'ordenes', component: SolicitudmaterialComponent },
     { path: 'transito', component: EntransitoComponent },
-    { path: 'inventario', component: InventarioComponent },
     { path: 'herramientas', component: HerramientasComponent },
     { path: 'materiales', component: MaterialesComponent },
     

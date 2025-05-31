@@ -4,11 +4,12 @@ import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { runPostSignalSetFn } from '@angular/core/primitives/signals';
+import { OtstatusComponent } from "./otstatus/otstatus.component";
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [],
+  imports: [OtstatusComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -44,6 +45,7 @@ export class HomeComponent implements OnInit {
     this.clientes = search.length > 0?search:this.datosservice.getClientes();
   }
   
+  // manda los items que no hay en almacén a comprar
   firmaBTN(event:Event) {
     let id = Number((event.target as HTMLInputElement).closest("tr")?.children[0].textContent);
     let version = Number((event.target as HTMLInputElement).closest("tr")?.children[1].textContent);
@@ -52,7 +54,7 @@ export class HomeComponent implements OnInit {
     let disenador = '';
     let tipo_orden = '';    
     let servicio = false;
-    console.log(id,version);
+    // console.log(id,version);
     this.odooservice.authenticate().pipe(
       switchMap(uidR => this.odooservice.read(uidR,[['ot_number','=',id],['revision_ot','=',version]],'dtm.odt',['id','disenador','tipe_order'],1).pipe(
           map(result => {
@@ -78,7 +80,8 @@ export class HomeComponent implements OnInit {
         ).pipe(
           map((result:any) => {
             result = result.filter((iterator:any) => iterator.almacen == true &&  iterator.entregado != true && iterator.materials_required > 0 && iterator.revision == false);  
-            result.forEach((item:any) => 
+            // console.log(result);
+            result.forEach((item:any) =>               
               this.odooservice.create(
                 uid,
                 'dtm.compras.requerido',
@@ -88,15 +91,17 @@ export class HomeComponent implements OnInit {
                   'disenador':disenador=='garcia'?'Luis':'Andrés',
                   'servicio':servicio,
                   'codigo':item.materials_list[0],
-                  'nombre':item.materials_list[1],
+                  'nombre':item.materials_list[1].slice(item.materials_list[0].toString().length, item.materials_list[1].length).trimStart(),
                   'cantidad':item.materials_required,
                   'tipo_orden':tipo_orden
                 }
               ).pipe(
                 switchMap(()=>  this.odooservice.update(uid,item.id ,'dtm.materials.line',{'revision':true})
               )
-              ).subscribe(result=>console.log('dtm.compras.requerido',result))            
+              ).subscribe(result=>console.log('dtm.compras.requerido',result))
+                          
             );
+           
             return result
           })
         )
@@ -158,3 +163,5 @@ export class HomeComponent implements OnInit {
     this.fetchClientes();   
   }
 }
+
+
