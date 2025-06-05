@@ -42,7 +42,12 @@
                                 <input type="number" min="0"  (input)="actualizarMin($event)" value="{{dato.minimo}}" class="td-filter" >
                             </div>
                         </td>
-                        <td>{{dato.cantidad}}</td>                        
+                        <!-- casilla con el stock -->
+                        <td>
+                            <div class="td-filter">
+                                <input type="number" min="0"  (input)="stockControl($event)" value="{{dato.cantidad}}" class="td-filter" >
+                            </div>                       
+                        </td> 
                         <td >
                             <div class="td-filter d-flex">
                                 <input type="number" min="0" style="width: 50%;" >

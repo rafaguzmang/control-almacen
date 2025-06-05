@@ -313,13 +313,15 @@ export class SolicitudmaterialComponent implements OnInit{
   fetchodooConect(){
     let material:any[] = [];
     let num = 0;
+    let uid = 0;
+    let inventario:any[] = [];
     this.odooConect.authenticate().pipe(
       // Lee la lista de materiales de todas las ordenes
-      switchMap(uid=> 
+      switchMap(getUid=> 
         this.odooConect.read(
-          uid,
+          getUid,
           [
-            ['model_id','!=',false],
+            ['id','!=',0],
             ['materials_cuantity','!=',0]
           ],
           'dtm.materials.line',
@@ -338,14 +340,16 @@ export class SolicitudmaterialComponent implements OnInit{
             'almacen',
             'model_id',
             'revision',            
-            'cant_entregada',            
+            'cant_entregada', 
+            'servicio_id'           
           ],
           0
         ).pipe(map((ordenes:any[])=>{
-          return{uid,ordenes};
+          uid = getUid;
+          return ordenes;
         }))
       ),
-      switchMap(({uid,ordenes})=> 
+      switchMap((ordenes)=> 
         this.odooConect.read(
           uid,
           [['ot_number', '!=',0 ]],
@@ -378,15 +382,35 @@ export class SolicitudmaterialComponent implements OnInit{
             'requerido':row.materials_required,
             'proyectado':0,
             'revision':row.revision,
-            'yaentregada': row.cant_entregada
+            'yaentregada': row.cant_entregada,
+            'servicio': row.servicio_id[0]
           })
         }) 
-      //   // Lee todo el inventario para poder agregar el stock cargado en sistema
+        // console.log(material);
+        // Lee todo el inventario para poder agregar el stock cargado en sistema
         return this.odooConect.read(uid,[['id','!=','0']],'dtm.materiales',['id','cantidad','apartado'],0)
         // return ordenId
       }),
-      map((inventario:any[])=>{
+      switchMap(inventario_id => 
+        this.odooConect.read(uid,[['extern_id','!=',false]],'dtm.odt.servicios',['id','extern_id'],0).pipe(
+          map((dtmmateriales:any[])=>{
+            inventario = inventario_id;
+            return dtmmateriales;
+          })
+        )
+
+      ),
+      map((dtmmateriales:any[])=>{
         // Crea un json con el id y agrega la cantidad id:cantidad del material, material apartado
+        material = material.map(item => {
+          // console.log(item.codigo);
+          if(dtmmateriales.find(servicio => servicio.id == item.servicio)){
+          
+            item.orden = Number(dtmmateriales.find(servicio => servicio.id == item.servicio).extern_id[1]);
+          }
+          return item
+        })
+        console.log(material);
          const cantidad:any = {};
          inventario.forEach(row => {
           cantidad[row.id]= [row.cantidad,row.apartado];

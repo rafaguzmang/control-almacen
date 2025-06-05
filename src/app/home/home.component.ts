@@ -5,11 +5,12 @@ import { DatosService } from '../services/datos.service';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { runPostSignalSetFn } from '@angular/core/primitives/signals';
 import { OtstatusComponent } from "./otstatus/otstatus.component";
+import { RevisionmaterialesComponent } from "./revisionmateriales/revisionmateriales.component";
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [OtstatusComponent],
+  imports: [OtstatusComponent, RevisionmaterialesComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -54,6 +55,7 @@ export class HomeComponent implements OnInit {
     let disenador = '';
     let tipo_orden = '';    
     let servicio = false;
+    let ordenes_id:any[]=[];
     // console.log(id,version);
     this.odooservice.authenticate().pipe(
       switchMap(uidR => this.odooservice.read(uidR,[['ot_number','=',id],['revision_ot','=',version]],'dtm.odt',['id','disenador','tipe_order'],1).pipe(
@@ -62,15 +64,27 @@ export class HomeComponent implements OnInit {
             disenador = result[0].disenador;
             tipo_orden = result[0].tipe_order;
             ordenId = result[0].id;
-            console.log(tipo_orden);
-            return result
+            ordenes_id = result;
+            // console.log('ordenes_id',ordenes_id);
           })
         )
+      ), switchMap(() => // se leen los servicios para buscar en la lista de materiales de servicios
+        this.odooservice.read(uid,[['extern_id','!=',false]],'dtm.odt.servicios',['id','extern_id'],0).pipe(
+          map((servicios:any[])=>{
+            servicios = servicios.filter(serv => Number(serv.extern_id[0])== ordenId)
+            servicios = servicios.map(serv => serv.id)
+            console.log(servicios);
+            return servicios;
+          })
+        )
+
       ),
-      switchMap(result => 
+      switchMap(servicios => 
         this.odooservice.read(uid,
           [
-            ['model_id','=',result[0].id]
+            '|',
+            ['model_id','=',ordenes_id[0].id], 
+            ['servicio_id','in', servicios]
           ],
             'dtm.materials.line',
           [
@@ -79,8 +93,8 @@ export class HomeComponent implements OnInit {
           0
         ).pipe(
           map((result:any) => {
+            console.log('result',result);
             result = result.filter((iterator:any) => iterator.almacen == true &&  iterator.entregado != true && iterator.materials_required > 0 && iterator.revision == false);  
-            // console.log(result);
             result.forEach((item:any) =>               
               this.odooservice.create(
                 uid,

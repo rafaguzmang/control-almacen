@@ -48,7 +48,7 @@ export class EntransitoComponent implements OnInit{
       this.odooConsulta.read(uid,[['orden_trabajo','=',datos.orden_trabajo===''?false:datos.orden_trabajo],
         ['proveedor','=',datos.proveedor],['codigo','=',datos.codigo],['descripcion','=',datos.descripcion],
         ['cantidad','=',parseInt(cantidad.value)]],
-        'dtm.control.entradas',['id'],20).subscribe(unlink=>{
+        'dtm.control.entradas',['id'],0).subscribe(unlink=>{
         // console.log(unlink[0].id);
         this.odooConsulta.delete(uid,'dtm.control.entradas',[unlink[0].id]).subscribe(del=>{
           // console.log(del);

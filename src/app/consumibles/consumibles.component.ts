@@ -17,11 +17,16 @@ export class ConsumiblesComponent implements OnInit {
   configuracion:boolean = false;
   btnconfigcolor:string = "";
   private limit:number = 0;
-  private autoRefreshSub: Subscription = new Subscription();
   
   public constructor(private odooConsumibles:OdooJsonRpcService,private odooData:DatosService){
     
   }
+  
+  stockControl(event:Event) {
+    const element = Number((event.target as HTMLInputElement).value)
+    console.log('element',element);
+  }
+
   minimoBtn() {
     this.configuracion = !this.configuracion;
       if(this.configuracion){
@@ -44,11 +49,7 @@ export class ConsumiblesComponent implements OnInit {
     let input = event.target as HTMLInputElement;
     let newtabla:any = [];
     this.odooData.getConsumibles().forEach
-    // this.odooData.getConsumibles().forEach(element => {
-    //   if(String(element.medida).toLocaleLowerCase().match(input.value.toLowerCase())){
-    //     newtabla.push(element);
-    //   }
-    // })
+ 
     this.consumibles = [];
     this.consumibles = newtabla;
     if(input.value ===""){
@@ -100,6 +101,8 @@ export class ConsumiblesComponent implements OnInit {
     
 
   }
+
+  // resta el material consumible entregado
   descontar(event:Event) {
     let datos:any = [];
     let element = event.target as HTMLButtonElement;
@@ -171,38 +174,16 @@ export class ConsumiblesComponent implements OnInit {
       if (findCero){
       this.odooData.setItemCero(true);
     }
-   
+    // obtiene la lista de los empleados
     this.odooConsumibles.authenticate().subscribe(uid =>{
       this.odooConsumibles.read(uid,[['id','!=','0']],'dtm.hr.empleados',['nombre'],0).subscribe(empleados=>{
         this.odooData.setEmpleados(empleados);
         this.empleados = this.odooData.getEmpleados();
       })
     })
-    // this.autoRefresh();
   }
 
-  autoRefresh():void{
-    this.autoRefreshSub = interval(10000)
-    .pipe(
-      switchMap(()=>this.odooConsumibles.authenticate()),
-      switchMap((uid)=>
-        this.odooConsumibles.read(
-          uid,
-          [['caracteristicas', '=', 'consumible']],
-          'dtm.diseno.almacen',
-          ['id', 'nombre', 'cantidad', 'minimo', 'localizacion', 'medida'],
-          this.limit
-        )
-      )
-    ).subscribe({
-      next: (datos) => {
-        const sortedArray = datos.sort((a: { cantidad: number }, b: { cantidad: number }) => a.cantidad - b.cantidad);
-        this.odooData.setConsumibles(sortedArray);
-        this.consumibles = this.odooData.getConsumibles();
-      }
-    }
-    )
-  }
+  
 
   
 
