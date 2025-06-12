@@ -346,6 +346,7 @@ export class SolicitudmaterialComponent implements OnInit{
           0
         ).pipe(map((ordenes:any[])=>{
           uid = getUid;
+          console.log(ordenes);
           return ordenes;
         }))
       ),
@@ -402,6 +403,7 @@ export class SolicitudmaterialComponent implements OnInit{
       ),
       map((dtmmateriales:any[])=>{
         // Crea un json con el id y agrega la cantidad id:cantidad del material, material apartado
+        // console.log(dtmmateriales);
         material = material.map(item => {
           // console.log(item.codigo);
           if(dtmmateriales.find(servicio => servicio.id == item.servicio)){
@@ -410,7 +412,7 @@ export class SolicitudmaterialComponent implements OnInit{
           }
           return item
         })
-        console.log(material);
+        // console.log(material);
          const cantidad:any = {};
          inventario.forEach(row => {
           cantidad[row.id]= [row.cantidad,row.apartado];

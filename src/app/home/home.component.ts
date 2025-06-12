@@ -58,7 +58,19 @@ export class HomeComponent implements OnInit {
     let ordenes_id:any[]=[];
     // console.log(id,version);
     this.odooservice.authenticate().pipe(
-      switchMap(uidR => this.odooservice.read(uidR,[['ot_number','=',id],['revision_ot','=',version]],'dtm.odt',['id','disenador','tipe_order'],1).pipe(
+      switchMap(uidR => this.odooservice.read(uidR,
+        [
+          ['ot_number','=',id],
+          ['revision_ot','=',version]
+        ],
+          'dtm.odt',
+        [
+          'id',
+          'disenador',
+          'tipe_order',
+          'firma_ingenieria'
+        ],
+        1).pipe(
           map(result => {
             uid = uidR;
             disenador = result[0].disenador;
@@ -107,7 +119,8 @@ export class HomeComponent implements OnInit {
                   'codigo':item.materials_list[0],
                   'nombre':item.materials_list[1].slice(item.materials_list[0].toString().length, item.materials_list[1].length).trimStart(),
                   'cantidad':item.materials_required,
-                  'tipo_orden':tipo_orden
+                  'tipo_orden':tipo_orden,
+                  'nesteo':ordenes_id[0].firma_ingenieria?true:false
                 }
               ).pipe(
                 switchMap(()=>  this.odooservice.update(uid,item.id ,'dtm.materials.line',{'revision':true})

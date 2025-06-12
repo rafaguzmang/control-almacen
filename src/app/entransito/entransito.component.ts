@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
+import { map, switchMap } from 'rxjs';
+import { takeCoverage } from 'v8';
 
 @Component({
   selector: 'app-entransito',
@@ -32,14 +34,17 @@ export class EntransitoComponent implements OnInit{
     //datos a imprimir
     let orden = rowTable.children[0].textContent;
     let proveedor = rowTable.children[1].textContent;
-    let codigo = rowTable.children[2].textContent;
-    let descripcion = rowTable.children[3].textContent;
+    let codigo = Number(rowTable.children[2].textContent);
+    let descripcion = String(rowTable.children[3].textContent);
     let fecha = formattedDate;
-    let cantidad = rowTable.children[6].children[0] as HTMLInputElement;
+    let cantidad = Number((rowTable.children[6].children[0] as HTMLInputElement).value);
     let factura = rowTable.children[7].children[0] as HTMLInputElement;
     let notas = rowTable.children[8].textContent;
-    datos={'orden_trabajo':orden,'proveedor':proveedor,'codigo':codigo,'descripcion':descripcion,'fecha_real':fecha,'cantidad':parseInt(cantidad.value),'factura':factura.value,'motivo':notas}
-    // console.log(datos);
+    let materiales_list:any[] = [];
+    let consumibles_list:any[] = [];
+    let herramientas_list:any[] = [];
+    // console.log(descripcion)
+    datos={'orden_trabajo':orden,'proveedor':proveedor,'codigo':codigo,'descripcion':descripcion,'fecha_real':fecha,'cantidad':cantidad,'factura':factura.value,'motivo':notas}
     //Actualiza información y pasa los items correspondientes en el modulo dtm_control_recibido
     this.odooConsulta.authenticate().subscribe(uid => {
       this.odooConsulta.create(uid,'dtm.control.recibido',datos).subscribe(creado=>{
@@ -47,7 +52,7 @@ export class EntransitoComponent implements OnInit{
       // Busca el id para poderlo borrar de dtm.control.entradas
       this.odooConsulta.read(uid,[['orden_trabajo','=',datos.orden_trabajo===''?false:datos.orden_trabajo],
         ['proveedor','=',datos.proveedor],['codigo','=',datos.codigo],['descripcion','=',datos.descripcion],
-        ['cantidad','=',parseInt(cantidad.value)]],
+        ['cantidad','=',cantidad]],
         'dtm.control.entradas',['id'],0).subscribe(unlink=>{
         // console.log(unlink[0].id);
         this.odooConsulta.delete(uid,'dtm.control.entradas',[unlink[0].id]).subscribe(del=>{
@@ -55,9 +60,54 @@ export class EntransitoComponent implements OnInit{
         })
         this.odooConsulta.read(uid,[['codigo','=',datos.codigo],['nombre','=',datos.descripcion],['cantidad','=',datos.cantidad],['proveedor','=',datos.proveedor]]
           ,'dtm.compras.realizado',['id'],20).subscribe(idUp=>{
-            // console.log(idUp[0].id)
-            this.odooConsulta.update(uid,idUp[0].id,'dtm.compras.realizado',{'cantidad_almacen':parseInt(datos.cantidad),'comprado':'Recibido'}).subscribe(result=>{
-              // console.log(result)
+            console.log(idUp[0].id)
+            // this.odooConsulta.update(uid,idUp[0].id,'dtm.compras.realizado',{'cantidad_almacen':parseInt(datos.cantidad),'comprado':'Recibido'}).subscribe(result=>{
+            this.odooConsulta.update(uid,idUp[0].id,'dtm.compras.realizado',{'cantidad_almacen':cantidad}).subscribe(result=>{
+              this.odooConsulta.read(uid,[['id','=',codigo]],'dtm.materiales',['cantidad','apartado'],1).pipe(
+                map(result => {
+                  // console.log(result);
+                  materiales_list = result;                  
+                }),
+                switchMap(()=>  this.odooConsulta.read(uid,[['id','=',codigo]],'dtm.consumibles',['cantidad'],1).pipe(
+                  map(result => {
+                    consumibles_list = result
+                  })
+                  ),
+                ),
+                 switchMap(()=>  this.odooConsulta.read(uid,[['nombre','=',descripcion.replace(/[. ]/g, '')]],'dtm.herramientas',['id','cantidad'],1).pipe(
+                  map(result => {
+                    herramientas_list = result
+                  })
+                  ),
+                ),
+                map(()=>{
+                  console.log(materiales_list,consumibles_list);
+                  if(materiales_list.length > 0){
+                    this.odooConsulta.update(uid,codigo,
+                    'dtm.materiales',
+                    {'cantidad':materiales_list[0].cantidad + cantidad ,
+                      'disponible':materiales_list[0].cantidad + cantidad - materiales_list[0].apartado>0?materiales_list[0].cantidad + cantidad - materiales_list[0].apartado:0,
+                    }).subscribe(()=> alert(`Código: ${codigo}\nTabla: Materiales\nAgregado: ${cantidad}\nTotal: ${materiales_list[0].cantidad + cantidad}`))
+                  }else if(consumibles_list.length > 0){
+                    this.odooConsulta.update(uid,codigo,
+                      'dtm.consumibles',
+                      {
+                        'cantidad':consumibles_list[0].cantidad + cantidad ,                      
+                      }
+                    ).subscribe(()=> alert(alert(`Código: ${codigo}\nTabla: Consumibles\nAgregado: ${cantidad}\nTotal: ${consumibles_list[0].cantidad + cantidad}`)))
+                  }
+                  else if (herramientas_list.length > 0){
+                    this.odooConsulta.update(uid,herramientas_list[0].id,
+                      'dtm.herramientas',
+                      {
+                        'cantidad':herramientas_list[0].cantidad + cantidad ,                      
+                      }
+                    ).subscribe(()=> alert(alert(`Código: ${codigo}\nTabla: Herramientas\nAgregado: ${cantidad}\nTotal: ${herramientas_list[0].cantidad + cantidad}`)))
+                  }
+                }),
+              
+              ).subscribe(()=> '')
+              
             })
             this.odooConsulta.read(uid,[['id','!=','0']],'dtm.control.entradas',['id','orden_trabajo', 'proveedor','codigo','descripcion',
               'cantidad','fecha_recepcion','fecha_real','factura'],20).subscribe(datos=>{
@@ -139,3 +189,7 @@ export class EntransitoComponent implements OnInit{
 
 
 }
+function tag(): import("rxjs").OperatorFunction<void, unknown> {
+  throw new Error('Function not implemented.');
+}
+

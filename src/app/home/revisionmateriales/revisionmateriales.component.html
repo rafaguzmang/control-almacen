@@ -1,19 +1,32 @@
-    <div class="table-responsive " style="height: 300px; overflow-y: auto;">
+    <div class="table-responsive m-3  bg-light rounded-1 border border-3 shadow-sm border-info " style="height: 300px; overflow-y: auto;">
               <table class="table table-success table-bordered  table-sm">
-                  <thead class="">
-                    <tr >
+                  <thead style="width: 100%;">
+                    <tr style="width: 100%;">
                       <th >#</th>
                       <th >Estatus</th>
-                    
+                      <th >Stock</th>
+                      <th style="width: 8%;">Cantidad</th>
+                      <th >Apartado</th>
+                      <th >Requerido</th>
+                      <th >Comprar</th>                    
                     </tr>
                   </thead>
                   <tbody>
-                    <!-- @for (item of tabla; track item.id) { -->
+                    @for (item of tabla; track item.id) {
                       <tr >
-                        <td></td>
-                        <td></td>                       
+                        <td>{{item.codigo}}</td>
+                        <td>{{item.material}}</td>                       
+                        <td style="width: 8%;">
+                          <input type="number" min="0" style="width:100%" (input)="calculadoraAlmacen($event)">
+                        </td>
+                        <td>{{item.cantidad}}</td>
+                        <td>{{item.apartado}}</td>
+                        <td>{{item.requerido}}</td>                       
+                        <td class="text-center">
+                          <button class="btn btn-light "><i class="fa-solid fa-cart-shopping"></i></button>
+                        </td>                       
                       </tr>     
-                    <!-- }                   -->
+                    }                  
                   </tbody>
                 </table>
     </div>
