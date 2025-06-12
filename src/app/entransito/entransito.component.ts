@@ -61,8 +61,8 @@ export class EntransitoComponent implements OnInit{
         this.odooConsulta.read(uid,[['codigo','=',datos.codigo],['nombre','=',datos.descripcion],['cantidad','=',datos.cantidad],['proveedor','=',datos.proveedor]]
           ,'dtm.compras.realizado',['id'],20).subscribe(idUp=>{
             console.log(idUp[0].id)
-            // this.odooConsulta.update(uid,idUp[0].id,'dtm.compras.realizado',{'cantidad_almacen':parseInt(datos.cantidad),'comprado':'Recibido'}).subscribe(result=>{
-            this.odooConsulta.update(uid,idUp[0].id,'dtm.compras.realizado',{'cantidad_almacen':cantidad}).subscribe(result=>{
+            this.odooConsulta.update(uid,idUp[0].id,'dtm.compras.realizado',{'cantidad_almacen':parseInt(datos.cantidad),'comprado':'Recibido'}).subscribe(result=>{
+            // this.odooConsulta.update(uid,idUp[0].id,'dtm.compras.realizado',{'cantidad_almacen':cantidad}).subscribe(result=>{
               this.odooConsulta.read(uid,[['id','=',codigo]],'dtm.materiales',['cantidad','apartado'],1).pipe(
                 map(result => {
                   // console.log(result);
@@ -114,21 +114,7 @@ export class EntransitoComponent implements OnInit{
                 this.datosService.setControlEntradas(datos);
             })
         })
-      })
-
-      //Actualiza el almacèn
-      // console.log(datos.orden_trabajo);
-      // console.log(datos.orden_trabajo.split(' '));
-      //Si es solo una orden ejecuta esta acción
-      if(datos.orden_trabajo.search(/ /)===-1){
-        this.ordenUpdate(uid,datos.orden_trabajo,datos.codigo,datos.cantidad);
-      }else{//Si son mas de una orden ejecuta esta acción
-        let ordenes = datos.orden_trabajo.split(' ');
-        for(let orden_trabajo of ordenes){
-          // console.log(orden)
-          this.ordenUpdate(uid,orden_trabajo,datos.codigo,datos.cantidad);
-        }
-      }
+      })   
       
     })
     this.datosService.controlEntradas$.subscribe(datos=>{

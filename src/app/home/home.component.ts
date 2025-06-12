@@ -80,7 +80,8 @@ export class HomeComponent implements OnInit {
             // console.log('ordenes_id',ordenes_id);
           })
         )
-      ), switchMap(() => // se leen los servicios para buscar en la lista de materiales de servicios
+      ), 
+      switchMap(() => // se leen los servicios para buscar en la lista de materiales de servicios
         this.odooservice.read(uid,[['extern_id','!=',false]],'dtm.odt.servicios',['id','extern_id'],0).pipe(
           map((servicios:any[])=>{
             servicios = servicios.filter(serv => Number(serv.extern_id[0])== ordenId)
@@ -106,8 +107,27 @@ export class HomeComponent implements OnInit {
         ).pipe(
           map((result:any) => {
             console.log('result',result);
+            //Hace un filtro de los materiales que no esten entregados, que no esten en compras o revisados por almacén y que requerido sea mayor a 0
             result = result.filter((iterator:any) => iterator.almacen == true &&  iterator.entregado != true && iterator.materials_required > 0 && iterator.revision == false);  
-            result.forEach((item:any) =>               
+            // Quita elementos con medidas no completas  iterator.materials_list[1].match("Lámina") && iterator.materials_list[1].match("Perfil") && iterator.materials_list[1].match("120.0 x 48.0") || iterator.materials_list[1].match("96.0 x 48.0") || iterator.materials_list[1].match("96.0 x 36.0") || iterator.materials_list[1].match(",236.0")
+            result = result.filter((iterator:any)=>
+              {
+                const str = iterator.materials_list[1];
+
+                const lamina = str.includes("Lámina");
+                const perfileria = ["Perfil", "Tubo", "P.T.R.","Ángulos","Canales","I.P.R","Varilla","Viga"].some(perfil => str.includes(perfil));
+                const medidas = ["120.0 x 48.0", "96.0 x 48.0", "96.0 x 36.0", ",236.0"].some(completa => str.includes(completa));
+                const completo = str.includes(",236.0")
+
+                if(lamina && medidas) return true
+                if(perfileria && completo) return true
+                if(!lamina && !perfileria) return true
+                return false;
+              }
+              
+            );
+            console.log(result);
+            result.forEach((item:any) =>  
               this.odooservice.create(
                 uid,
                 'dtm.compras.requerido',
