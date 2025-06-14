@@ -36,23 +36,28 @@ export class EntransitoComponent implements OnInit{
     const codigo = Number(rowTable?.children[3].textContent);
     const descripcion = String(rowTable?.children[4].textContent);
     const fecha = formattedDate;
+    const cantidad_solicitada = Number(rowTable?.children[6].textContent);
     const cantidad = Number((rowTable?.children[7].children[0] as HTMLInputElement).value);
-    const factura = rowTable?.children[8].children[0] as HTMLInputElement;
-    const notas = rowTable?.children[9].textContent;
+    const factura = (rowTable?.children[8].children[0] as HTMLInputElement).value;
+    const notas = (rowTable?.children[9].children[0] as HTMLInputElement).value;
    
     let uid:number;
     let ot_id:number
     let control_entradas_id:number;   
     let encontrado:boolean; 
    
-    console.log(String(orden)
-    ,version
-    ,proveedor
-    ,codigo
-    ,descripcion
-    ,fecha
-    ,cantidad
-    );
+    // console.log(
+    //   String(orden)
+    //   ,version
+    //   ,proveedor
+    //   ,codigo
+    //   ,descripcion
+    //   ,fecha
+    //   ,cantidad
+    //   ,cantidad_solicitada
+    //   ,factura
+    //   ,notas
+    // );
     // //Actualiza información y pasa los items correspondientes en el modulo dtm_control_recibido
     this.odooConsulta.authenticate().pipe(
       // se obtiene el id de la orden de servicios y versión de la misma
@@ -101,8 +106,8 @@ export class EntransitoComponent implements OnInit{
       // lee la tabla de MATERIALES para actualizar cantidad y apartado
       switchMap(() => this.odooConsulta.read(uid,[['id','=',codigo]],'dtm.materiales',['id','cantidad','apartado'],1).pipe(
           map((result:any)=>{
-            console.log('materiales',result);
             if(result.length > 0 && encontrado == true){
+              console.log('materiales',result);
               this.odooConsulta.update(uid,
                 codigo,
                 'dtm.materiales',
@@ -117,8 +122,8 @@ export class EntransitoComponent implements OnInit{
       // mete el material a la orden correspondiente
       switchMap(()=> this.odooConsulta.read(uid,[['materials_list','=',codigo],['model_id','=',ot_id]],'dtm.materials.line',['id','materials_cuantity'],1).pipe(
           map(result=>{
-            console.log('materials_list',result);
             if(result.length>0 && encontrado == true){
+              console.log('materials_list',result);
               this.odooConsulta.update(uid,result[0].id,
                 'dtm.materials.line',
                 {'materials_required':0,'materials_availabe':result[0].materials_cuantity}
@@ -130,8 +135,8 @@ export class EntransitoComponent implements OnInit{
       // busca si el material está en CONSUMIBLES y se ingresa al stock
       switchMap(()=> this.odooConsulta.read(uid,[['id','=',codigo]],'dtm.consumibles',['cantidad'],1).pipe(
           map(result_consumibles=>{
-            console.log('Consumibles',result_consumibles);
             if(result_consumibles.length>0 && encontrado == true){
+              console.log('Consumibles',result_consumibles);
               this.odooConsulta.update(uid,codigo,
                 'dtm.consumibles',
                 {
@@ -145,9 +150,8 @@ export class EntransitoComponent implements OnInit{
       // busca si el material está en HERRAMIENTAS y se ingresa al stock
       switchMap(()=> this.odooConsulta.read(uid,[['nombre','ilike',descripcion.replace(/[.\s]+$/, '')]],'dtm.herramientas',['id','cantidad'],1).pipe(
           map(result=>{
-            console.log(descripcion.replace(/[.\s]+$/, ''));
-            console.log('Herramientas',result);
-            if(result.length>0 && encontrado == true){
+            if(result.length > 0 && encontrado == true){
+              console.log('Herramientas',result);
               this.odooConsulta.update(uid,result[0].id,
                 'dtm.herramientas',
                 {
@@ -155,6 +159,27 @@ export class EntransitoComponent implements OnInit{
                 }
               ).subscribe(()=> alert(`Código: ${codigo}\nTabla: Herramientas\nAgregado: ${cantidad}\nTotal: ${result[0].cantidad + cantidad}`))
             }
+          })
+        )
+      ),
+      // pasa la información al historial dtm_control_recibido
+      switchMap(()=> this.odooConsulta.create(uid,
+        'dtm.control.recibido',
+        {
+          'cantidad':cantidad,
+          'cantidad_real':cantidad_solicitada,
+          'proveedor':proveedor,
+          'codigo':codigo,
+          'descripcion':descripcion,
+          'fecha_recepcion':fecha,
+          'fecha_real':formattedDate,
+          'orden_trabajo':orden,
+          'factura':factura,
+          'motivo':notas
+        }).pipe(
+          map(result=>{
+            console.log(result);
+           
           })
         )
       ),
@@ -167,7 +192,7 @@ export class EntransitoComponent implements OnInit{
         0).pipe(
           map(result=> {
             console.log('control',result);
-            if(result.length > 0){
+            if(result.length > 0 && encontrado == true){
               this.odooConsulta.delete(uid,'dtm.control.entradas',[result[0].id]).subscribe(result=>console.log(result))
             }else{
               alert("Item no encontrado en Control de Entradas")
