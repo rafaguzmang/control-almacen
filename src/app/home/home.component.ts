@@ -55,7 +55,9 @@ export class HomeComponent implements OnInit {
     let disenador = '';
     let tipo_orden = '';    
     let servicio = false;
-    let ordenes_id:any[]=[];
+    let orden_id:any[]=[];
+    let compras_realizado:any[] = [];
+    let servicios_id:any[]=[];
     // console.log(id,version);
     this.odooservice.authenticate().pipe(
       switchMap(uidR => this.odooservice.read(uidR,
@@ -76,28 +78,35 @@ export class HomeComponent implements OnInit {
             disenador = result[0].disenador;
             tipo_orden = result[0].tipe_order;
             ordenId = result[0].id;
-            ordenes_id = result;
-            // console.log('ordenes_id',ordenes_id);
+            orden_id = result;
+            console.log('orden_id',orden_id);
           })
         )
-      ), 
+      ), // Busca si hay items ya comprado de esta orden para no volverlos a pedir
+      switchMap(()=> this.odooservice.read(uid,[['orden_trabajo','=',String(id)]],'dtm.compras.realizado',['id','codigo'],0).pipe(
+          map(result => {
+            console.log('compras.realizado',result);
+            compras_realizado = result;
+          })
+        )
+      ),
       switchMap(() => // se leen los servicios para buscar en la lista de materiales de servicios
         this.odooservice.read(uid,[['extern_id','!=',false]],'dtm.odt.servicios',['id','extern_id'],0).pipe(
-          map((servicios:any[])=>{
-            servicios = servicios.filter(serv => Number(serv.extern_id[0])== ordenId)
-            servicios = servicios.map(serv => serv.id)
-            console.log(servicios);
-            return servicios;
+          map((servicio:any[])=>{
+            servicio = servicio.filter(serv => Number(serv.extern_id[0])== ordenId)
+            servicio = servicio.map(serv => serv.id)
+            console.log('dtm.odt.servicios',servicio);
+            return servicio;
           })
         )
-
-      ),
-      switchMap(servicios => 
+      ),       
+      // se buscan los items en el modelo de dtm_materials_line
+      switchMap((servicio:any) => 
         this.odooservice.read(uid,
           [
             '|',
-            ['model_id','=',ordenes_id[0].id], 
-            ['servicio_id','in', servicios]
+            ['model_id','=',orden_id[0].id], 
+            ['servicio_id','in', servicio]
           ],
             'dtm.materials.line',
           [
@@ -107,25 +116,29 @@ export class HomeComponent implements OnInit {
         ).pipe(
           map((result:any) => {
             console.log('result',result);
-            //Hace un filtro de los materiales que no esten entregados, que no esten en compras o revisados por almacén y que requerido sea mayor a 0
-            result = result.filter((iterator:any) => iterator.almacen == true &&  iterator.entregado != true && iterator.materials_required > 0 && iterator.revision == false);  
+            // Hace un filtro de los materiales que no esten entregados, que no esten en compras o revisados por almacén y que requerido sea mayor a 0
+            result = result.filter((iterator:any) => iterator.almacen == true &&  iterator.entregado != true && iterator.materials_required > 0 && iterator.revision != true);  
             // Quita elementos con medidas no completas  iterator.materials_list[1].match("Lámina") && iterator.materials_list[1].match("Perfil") && iterator.materials_list[1].match("120.0 x 48.0") || iterator.materials_list[1].match("96.0 x 48.0") || iterator.materials_list[1].match("96.0 x 36.0") || iterator.materials_list[1].match(",236.0")
             result = result.filter((iterator:any)=>
               {
                 const str = iterator.materials_list[1];
-
                 const lamina = str.includes("Lámina");
                 const perfileria = ["Perfil", "Tubo", "P.T.R.","Ángulos","Canales","I.P.R","Varilla","Viga"].some(perfil => str.includes(perfil));
                 const medidas = ["120.0 x 48.0", "96.0 x 48.0", "96.0 x 36.0", ",236.0"].some(completa => str.includes(completa));
-                const completo = str.includes(",236.0")
+                const completo = str.endsWith("236.0")
 
                 if(lamina && medidas) return true
                 if(perfileria && completo) return true
                 if(!lamina && !perfileria) return true
                 return false;
-              }
-              
+              }              
             );
+            result = result.filter((iterator: any) => {
+              return !compras_realizado.some(matI => 
+                matI.orden_trabajo === iterator.codigo && matI.codigo === iterator.codigo
+              );
+            });
+
             console.log(result);
             result.forEach((item:any) =>  
               this.odooservice.create(
@@ -140,7 +153,7 @@ export class HomeComponent implements OnInit {
                   'nombre':item.materials_list[1].slice(item.materials_list[0].toString().length, item.materials_list[1].length).trimStart(),
                   'cantidad':item.materials_required,
                   'tipo_orden':tipo_orden,
-                  'nesteo':ordenes_id[0].firma_ingenieria?true:false
+                  'nesteo':orden_id[0].firma_ingenieria?true:false
                 }
               ).pipe(
                 switchMap(()=>  this.odooservice.update(uid,item.id ,'dtm.materials.line',{'revision':true})
@@ -163,9 +176,9 @@ export class HomeComponent implements OnInit {
         console.log(error);
         return of([])
       })
-    ).subscribe(result=> 
+    ).subscribe(()=> 
       {
-        console.log(result);
+        // console.log(result);
         
         this.fetchAll();
        
