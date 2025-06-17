@@ -75,7 +75,7 @@ export class HerramientasComponent implements OnInit {
     let newtabla:any = []; 
     console.log(input.value);
     this.datosService.getHerramientas().forEach((item: any) => {
-      if(String(item.nombre).toLowerCase().match(String(input.value).toLowerCase())){
+      if(String(item.nombre).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(String(input.value).normalize("NFD").replace(/[\u0300-\u036f]/g, ""))){
         newtabla.push(item);
       }
     })
