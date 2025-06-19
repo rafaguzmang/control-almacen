@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
 import { ActivatedRoute } from '@angular/router';
@@ -22,9 +22,9 @@ export class SolicitudmaterialComponent implements OnInit{
   cliente: string = '';
   proyecto: string = '';
   private timer:any;
-  ngzone: any;
+ 
   
-  constructor(private odooConect:OdooJsonRpcService, private dataMat:DatosService,private route:ActivatedRoute){}
+  constructor(private odooConect:OdooJsonRpcService, private dataMat:DatosService,private route:ActivatedRoute, private ngzone:NgZone){}
 
 
   // updateData(uid:number,id:number,modelo:string,val:any){
@@ -245,17 +245,18 @@ export class SolicitudmaterialComponent implements OnInit{
         })   
       
     ).subscribe(()=>{
-       this.dataMat.getMaterial().find(row => {
-         if(row.id == id){
-            console.log(row);
-            row.entregado = true;
+         this.fetchodooConect( );
+         this.dataMat.getMaterial().find(row => {       
+           if(row.id == id){
+              console.log('Actualizado');
+              row.entregado = true;
+            }
+          })
+          if(this.ordensch ){
+            this.searchOT();
+          }else{
+            this.searchCodigo();          
           }
-        })
-        if(this.ordensch ){
-          this.searchOT();
-        }else{
-          this.searchCodigo();          
-        }
     })
       
      
@@ -452,13 +453,13 @@ export class SolicitudmaterialComponent implements OnInit{
     // Obtiene la lista de materiales de todas las ordenes y las guarda en local
     this.fetchodooConect( );
     
-    // this.ngzone.runOutsideAngular(()=>{
-    //   setInterval(() => {
-    //     this.ngzone.run(()=>{
-    //       this.fetchodooConect();    
-    //     })
-    //   }, 5000);
-    // }) 
+    this.ngzone.runOutsideAngular(()=>{
+      setInterval(() => {
+        this.ngzone.run(()=>{
+          this.fetchodooConect();    
+        })
+      }, 5000);
+    }) 
 
 
 

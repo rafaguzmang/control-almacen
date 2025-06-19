@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
 import { map, switchMap } from 'rxjs';
@@ -16,7 +16,7 @@ import { version } from 'os';
 export class EntransitoComponent implements OnInit{
   datos:any [] = [];
 
-  constructor(private odooConsulta: OdooJsonRpcService,private datosService:DatosService){}
+  constructor(private odooConsulta: OdooJsonRpcService,private datosService:DatosService,private ngzone:NgZone){}
 
   materialDone(event:Event) {
     let datos:any = [];
@@ -201,19 +201,24 @@ export class EntransitoComponent implements OnInit{
         )
       ),
     ).subscribe(() => {
-      this.odooConsulta.read(uid,[['id','!=','0']],'dtm.control.entradas',['id','orden_trabajo', 'proveedor','codigo','descripcion',
-        'cantidad','fecha_recepcion','fecha_real','factura','revision_ot'],0).subscribe(datos =>{
-        this.datosService.setControlEntradas(datos);
-      })
-      
-      })
-        this.datosService.controlEntradas$.subscribe(datos=>{
-        this.datos = datos;
+        this.fetchData();
       })
   }
   //Configuración inicial
   ngOnInit(): void {
-    // Consulta de todos los items   
+    this.fetchData()
+    this.ngzone.runOutsideAngular(()=>{
+      setInterval(() => {
+        this.ngzone.run(()=>{
+          this.fetchData();    
+        })
+      }, 5000);
+    }) 
+    
+  }
+
+  fetchData(){
+     // Consulta de todos los items   
     // Obserbable para ocultar esta tabla de items
     this.odooConsulta.authenticate().subscribe(uid =>{
       this.odooConsulta.read(uid,[['id','!=','0']],'dtm.control.entradas',['id','orden_trabajo', 'proveedor','codigo','descripcion',

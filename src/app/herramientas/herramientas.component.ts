@@ -70,6 +70,8 @@ export class HerramientasComponent implements OnInit {
     this.tabla = newtabla;
   }
 
+  
+
   nombreSearch(event: Event) {
     let input = event.target as HTMLInputElement;
     let newtabla:any = []; 
