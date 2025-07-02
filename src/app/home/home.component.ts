@@ -124,7 +124,7 @@ export class HomeComponent implements OnInit {
                 const str = iterator.materials_list[1];
                 const lamina = str.includes("Lámina");
                 const perfileria = ["Perfil", "Tubo", "P.T.R.","Ángulos","Canales","I.P.R","Varilla","Viga"].some(perfil => str.includes(perfil));
-                const medidas = ["120.0 x 48.0", "96.0 x 48.0", "96.0 x 36.0", ",236.0"].some(completa => str.includes(completa));
+                const medidas = ["120.0 x 48.0", "96.0 x 48.0", "96.0 x 36.0", "60.0 x 48.0", ",236.0"].some(completa => str.includes(completa));
                 const completo = str.endsWith("236.0")
 
                 if(lamina && medidas) return true

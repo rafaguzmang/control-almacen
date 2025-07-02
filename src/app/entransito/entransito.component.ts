@@ -78,7 +78,7 @@ export class EntransitoComponent implements OnInit{
             ['proveedor','=',proveedor],
             ['codigo','=',codigo],
             ['nombre','=',descripcion],            
-            ['cantidad','=',cantidad],
+            ['cantidad','=',cantidad_solicitada],
           ],
           'dtm.compras.realizado',
           ['id'],
@@ -126,7 +126,7 @@ export class EntransitoComponent implements OnInit{
               console.log('materials_list',result);
               this.odooConsulta.update(uid,result[0].id,
                 'dtm.materials.line',
-                {'materials_required':0,'materials_availabe':result[0].materials_cuantity}
+                {'materials_required':cantidad_solicitada - cantidad,'materials_availabe':result[0].materials_availabe + cantidad}
               ).subscribe(()=> alert(`Materiales\nOrden: ${orden}\nCódigo: ${codigo}\nCantidad: ${cantidad}`))  
             }
           })
@@ -186,7 +186,7 @@ export class EntransitoComponent implements OnInit{
        // se obtiene el id del modelo de CONTROL DE ENTRADAS para poder borrarlo despues del ingreso del material
       switchMap(()=>  this.odooConsulta.read(uid,[['orden_trabajo','=',orden],['revision_ot','=',version],
         ['proveedor','=',proveedor],['codigo','=',codigo],['descripcion','=',descripcion],
-        ['cantidad','=',cantidad]],
+        ['cantidad','=',cantidad_solicitada]],
         'dtm.control.entradas',
         ['id'],
         0).pipe(
