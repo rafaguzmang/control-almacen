@@ -1,7 +1,7 @@
 import { Component, NgZone, OnInit } from '@angular/core';
 import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
-import { map, switchMap } from 'rxjs';
+import { map, of, switchMap, tap } from 'rxjs';
 import { takeCoverage } from 'v8';
 import e from 'express';
 import { version } from 'os';
@@ -120,15 +120,30 @@ export class EntransitoComponent implements OnInit{
         )
       ),
       // mete el material a la orden correspondiente
-      switchMap(()=> this.odooConsulta.read(uid,[['materials_list','=',codigo],['model_id','=',ot_id]],'dtm.materials.line',['id','materials_cuantity'],1).pipe(
-          map(result=>{
-            if(result.length>0 && encontrado == true){
-              console.log('materials_list',result);
-              this.odooConsulta.update(uid,result[0].id,
-                'dtm.materials.line',
-                {'materials_required':cantidad_solicitada - cantidad,'materials_availabe':result[0].materials_availabe + cantidad}
-              ).subscribe(()=> alert(`Materiales\nOrden: ${orden}\nCódigo: ${codigo}\nCantidad: ${cantidad}`))  
+     switchMap(() =>
+  this.odooConsulta.read(
+    uid,
+    [['materials_list', '=', codigo], ['model_id', '=', ot_id]],
+    'dtm.materials.line',
+    ['id', 'materials_cuantity', 'materials_availabe'],
+    1
+  ).pipe(
+    switchMap((result) => {
+      if (result.length > 0 && encontrado === true) {
+              const id = result[0].id;
+              const nuevoDisponible = result[0].materials_availabe + cantidad;
+              const nuevoRequerido = cantidad_solicitada - cantidad;
+
+              return this.odooConsulta.update(uid, id, 'dtm.materials.line', {
+                materials_required: nuevoRequerido,
+                materials_availabe: nuevoDisponible,
+              }).pipe(
+                tap(() => alert(`Materiales\nOrden: ${orden}\nCódigo: ${codigo}\nCantidad: ${cantidad}`))
+              );
             }
+
+            // Si no hay resultado o no se cumple la condición, retorna un observable vacío
+            return of(null);
           })
         )
       ),
