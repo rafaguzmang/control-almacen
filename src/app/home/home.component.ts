@@ -139,8 +139,9 @@ export class HomeComponent implements OnInit {
               );
             });
 
-            console.log(result);
-            result.forEach((item:any) =>  
+            console.log("Para compras",result);
+            result.forEach((item:any) =>  {
+              console.log(id,version,disenador,item.materials_list[0],item.materials_list[1].slice(item.materials_list[0].toString().length, item.materials_list[1].length).trimStart(),item.materials_required,tipo_orden,orden_id[0].firma_ingenieria?true:false)
               this.odooservice.create(
                 uid,
                 'dtm.compras.requerido',
@@ -148,19 +149,19 @@ export class HomeComponent implements OnInit {
                   'orden_trabajo':id,
                   'revision_ot':version,
                   'disenador':disenador,
-                  'servicio':servicio,
                   'codigo':item.materials_list[0],
                   'nombre':item.materials_list[1].slice(item.materials_list[0].toString().length, item.materials_list[1].length).trimStart(),
                   'cantidad':item.materials_required,
                   'tipo_orden':tipo_orden,
                   'nesteo':orden_id[0].firma_ingenieria?true:false
                 }
+
               ).pipe(
                 switchMap(()=>  this.odooservice.update(uid,item.id ,'dtm.materials.line',{'revision':true})
               )
               ).subscribe(result=>console.log('dtm.compras.requerido',result))
                           
-            );
+          });
            
             return result
           })

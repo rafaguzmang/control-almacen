@@ -342,12 +342,11 @@ export class SolicitudmaterialComponent implements OnInit{
             'model_id',
             'revision',            
             'cant_entregada', 
-            'servicio_id'           
           ],
           0
         ).pipe(map((ordenes:any[])=>{
           uid = getUid;
-          console.log(ordenes);
+          console.log('ordenes',ordenes);
           return ordenes;
         }))
       ),
@@ -385,17 +384,17 @@ export class SolicitudmaterialComponent implements OnInit{
             'proyectado':0,
             'revision':row.revision,
             'yaentregada': row.cant_entregada,
-            'servicio': row.servicio_id[0]
           })
         }) 
         // console.log(material);
         // Lee todo el inventario para poder agregar el stock cargado en sistema
-        return this.odooConect.read(uid,[['id','!=','0']],'dtm.materiales',['id','cantidad','apartado'],0)
+        return this.odooConect.read(uid,[['id','!=','0']],'dtm.materiales',['id','cantidad','apartado'],0).pipe()
         // return ordenId
       }),
       switchMap(inventario_id => 
         this.odooConect.read(uid,[['extern_id','!=',false]],'dtm.odt.servicios',['id','extern_id'],0).pipe(
           map((dtmmateriales:any[])=>{
+            console.log('dtmmateriales',dtmmateriales);
             inventario = inventario_id;
             return dtmmateriales;
           })
@@ -432,7 +431,7 @@ export class SolicitudmaterialComponent implements OnInit{
       })
       
     ).subscribe((result:any) => {
-      // console.log(material);
+      console.log(result);
       // Pasa la información a la tabla correspondiente en un service  
       this.dataMat.setMaterial(result);
       // Carga la tabla local con la información desde el service
@@ -452,7 +451,6 @@ export class SolicitudmaterialComponent implements OnInit{
   ngOnInit(): void {
     // Obtiene la lista de materiales de todas las ordenes y las guarda en local
     this.fetchodooConect( );
-    
     this.ngzone.runOutsideAngular(()=>{
       setInterval(() => {
         this.ngzone.run(()=>{
