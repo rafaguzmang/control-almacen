@@ -394,7 +394,7 @@ export class SolicitudmaterialComponent implements OnInit{
       switchMap(inventario_id => 
         this.odooConect.read(uid,[['extern_id','!=',false]],'dtm.odt.servicios',['id','extern_id'],0).pipe(
           map((dtmmateriales:any[])=>{
-            console.log('dtmmateriales',dtmmateriales);
+            // console.log('dtmmateriales',dtmmateriales);
             inventario = inventario_id;
             return dtmmateriales;
           })

@@ -58,7 +58,7 @@ export class HomeComponent implements OnInit {
     let orden_id:any[]=[];
     let compras_realizado:any[] = [];
     let servicios_id:any[]=[];
-    // console.log(id,version);
+    console.log(id,version);
     this.odooservice.authenticate().pipe(
       switchMap(uidR => this.odooservice.read(uidR,
         [
