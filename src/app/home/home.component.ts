@@ -79,7 +79,7 @@ export class HomeComponent implements OnInit {
             tipo_orden = result[0].tipe_order;
             ordenId = result[0].id;
             orden_id = result;
-            console.log('orden_id',orden_id);
+            // console.log('orden_id',orden_id);
           })
         )
       ), // Busca si hay items ya comprado de esta orden para no volverlos a pedir
@@ -90,23 +90,23 @@ export class HomeComponent implements OnInit {
           })
         )
       ),
-      switchMap(() => // se leen los servicios para buscar en la lista de materiales de servicios
-        this.odooservice.read(uid,[['extern_id','!=',false]],'dtm.odt.servicios',['id','extern_id'],0).pipe(
-          map((servicio:any[])=>{
-            servicio = servicio.filter(serv => Number(serv.extern_id[0])== ordenId)
-            servicio = servicio.map(serv => serv.id)
-            console.log('dtm.odt.servicios',servicio);
-            return servicio;
-          })
-        )
-      ),       
+      // switchMap(() => // se leen los servicios para buscar en la lista de materiales de servicios
+      //   this.odooservice.read(uid,[['extern_id','!=',false]],'dtm.odt.servicios',['id','extern_id'],0).pipe(
+      //     map((servicio:any[])=>{
+      //       // servicio = servicio.filter(serv => Number(serv.extern_id[0])== ordenId)
+      //       // servicio = servicio.map(serv => serv.id)
+      //       // console.log('dtm.odt.servicios',servicio);
+      //       return servicio;
+      //     })
+      //   )
+      // ),       
       // se buscan los items en el modelo de dtm_materials_line
-      switchMap((servicio:any) => 
+      switchMap(() => 
         this.odooservice.read(uid,
           [
-            '|',
+            
             ['model_id','=',orden_id[0].id], 
-            ['servicio_id','in', servicio]
+            // ['servicio_id','in', servicio]
           ],
             'dtm.materials.line',
           [
