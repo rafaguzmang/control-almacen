@@ -222,11 +222,13 @@ export class SolicitudmaterialComponent implements OnInit{
     let codigo = Number(rowTable?.children[2].textContent??'0');
     let stock = Number((rowTable?.children[6].children[0] as HTMLInputElement).value);
     let proyectado = Number(rowTable?.children[7].textContent??'0');
+    let cantidad = Number(rowTable?.children[8].textContent??'0');
     let entregado = Number((rowTable?.children[11].children[0].children[0] as HTMLInputElement).value);
     let recibe =  rowTable?.children[11].children[0].children[1] as HTMLSelectElement;
     let id = this.dataMat.getMaterial().find(row => row.codigo == codigo && row.orden == orden && row.version == version).id
     // console.log(stock,entregado);
-    this.odooConect.authenticate().pipe(      
+    if(entregado >= cantidad){
+      this.odooConect.authenticate().pipe(      
       switchMap(uid=> this.odooConect.update(uid,id,'dtm.materials.line',{'entregado':true,'recibe':recibe.options[recibe.selectedIndex].text}).pipe(
             map(()=>{return uid})
           )
@@ -258,6 +260,10 @@ export class SolicitudmaterialComponent implements OnInit{
             this.searchCodigo();          
           }
     })
+    }else{
+      alert('La cantidad entregada debe ser igual o mayor a la solicitada');
+    }
+    
       
      
   }

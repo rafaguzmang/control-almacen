@@ -117,14 +117,19 @@ export class HomeComponent implements OnInit {
           map((result:any) => {
             console.log('result',result);
             // Hace un filtro de los materiales que no esten entregados, que no esten en compras o revisados por almacén y que requerido sea mayor a 0
-            result = result.filter((iterator:any) => iterator.almacen == true &&  iterator.entregado != true && iterator.materials_required > 0 && iterator.revision != true);  
+            result = result.filter((iterator:any) => iterator.almacen == true &&  iterator.entregado != true && iterator.materials_required > 0 && iterator.revision != true );  
             // Quita elementos con medidas no completas  iterator.materials_list[1].match("Lámina") && iterator.materials_list[1].match("Perfil") && iterator.materials_list[1].match("120.0 x 48.0") || iterator.materials_list[1].match("96.0 x 48.0") || iterator.materials_list[1].match("96.0 x 36.0") || iterator.materials_list[1].match(",236.0")
             result = result.filter((iterator:any)=>
               {
                 const str = iterator.materials_list[1];
                 const lamina = str.includes("Lámina");
                 const perfileria = ["Perfil", "Tubo", "P.T.R.","Ángulos","Canales","I.P.R","Varilla","Viga"].some(perfil => str.includes(perfil));
-                const medidas = ["120.0 x 48.0", "96.0 x 48.0", "96.0 x 36.0", "60.0 x 48.0", ",236.0"].some(completa => str.includes(completa));
+                const medidas = ["120.0 x 48.0", "96.0 x 48.0", "96.0 x 36.0", "60.0 x 48.0", ",236.0","120.0 x 72.0"].some(completa => str.includes(completa));
+                // const completosList = [
+                //     "236.0",
+                //     "45.0 mm x 45.0 mm x 5600 mm"
+                // ];
+                // const completo = completosList.some(fin => str.endsWith(fin));
                 const completo = str.endsWith("236.0")
 
                 if(lamina && medidas) return true

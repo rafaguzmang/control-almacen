@@ -16,6 +16,7 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- filtro -->
                 <tr>
                     <td >
                         <input type="number" min="0" class="td-filter cogigo-search" (input)="codigoSearch($event)">
@@ -32,6 +33,7 @@
                     <td></td>                    
                     <td></td>  
                 </tr>
+                <!-- datos -->
                 @for (dato of consumibles; track dato.id ){    
                     <tr [class.table-danger]="dato.cantidad===0" [class.table-warning]="dato.cantidad<=dato.minimo">
                         <td>{{dato.id}}</td>

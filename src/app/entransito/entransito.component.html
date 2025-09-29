@@ -9,11 +9,11 @@
                     <td>Código</td>
                     <td class="input-descripcion">Descripción</td>
                     <td>Fecha Estimada</td>
-                    <td>Cantidad</td>
-                    <td class="input-number">C.Recibida</td>
+                    <td>Solicitado</td>
+                    <td>Recibido</td>
+                    <td class="input-number">Cantidad</td>
                     <td>Factura</td>
                     <td>Notas</td>
-                    <td>Recibir</td>
                 </tr>
             </thead>
             <tbody>
@@ -27,19 +27,19 @@
                         <td>{{dato.descripcion}}</td>
                         <td>{{dato.fecha_recepcion}}</td>
                         <td>{{dato.cantidad}}</td>
+                        <td>{{dato.cantidad_real}}</td>
                         <td>
-                            <input type="number" class="input-number-in" value="{{dato.cantidad}}" min="0">
+                            <input type="number" class="input-number-in" (input)="materialDone($event)" value="0" min="-1">
                         </td>
-                        <td>
-                            
-                            <input type="text" class="input-number-in" value="{{dato.factura===false?'':dato.factura}}" placeholder="Factura">
+                        <td>                            
+                            <input type="text" class="input-number-in" (input)="facturaFunc($event)" value="{{dato.factura===false?'':dato.factura}}" placeholder="Factura">
                         </td>
                         <td>
                             <input type="text" placeholder="Notas" >
                         </td>
-                        <td>
+                        <!-- <td>
                             <button class="btn btn-outline-success " (click)="materialDone($event)"><i class="fa-solid fa-truck-ramp-box"></i></button>
-                        </td>
+                        </td> -->
                     </tr>
                 }
             </tbody>

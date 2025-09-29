@@ -37,7 +37,7 @@ export class OdooJsonRpcService {
     let params = {
       service: 'common',
       method: 'authenticate',
-      args: ['backup', 'rafaguzmang@hotmail.com', 'admin', {}], 
+      args: ['backup', 'control_almacen@dtmindustry.com', 'control_almacen', {}], 
     };    
 
     return this.call(method, params).pipe(
@@ -53,7 +53,7 @@ export class OdooJsonRpcService {
             args: [
               'backup',          // Base de datos
               uid,               // UID autenticado
-              'admin',           // Contraseña
+              'control_almacen',           // Contraseña
               model, // Nombre del modelo
               'search_read',     // Método a ejecutar
                 domain, // Dominio para filtrar registros
@@ -77,7 +77,7 @@ export class OdooJsonRpcService {
           args:  [
             "backup",     // Nombre de la base de datos
             uid,                          // ID del usuario que ejecuta la acción (Admin usualmente es 2)
-            "admin",               // Contraseña del usuario
+            "control_almacen",               // Contraseña del usuario
             model,        // Nombre del modelo (por ejemplo, 'res.partner')
             "write",                    // Método a ejecutar
             [id],
@@ -98,7 +98,7 @@ export class OdooJsonRpcService {
           args:  [
             "backup",     // Nombre de la base de datos
             uid,                          // ID del usuario que ejecuta la acción (Admin usualmente es 2)
-            "admin",               // Contraseña del usuario
+            "control_almacen",               // Contraseña del usuario
             model,        // Nombre del modelo (por ejemplo, 'res.partner')
             "create",                    // Método a ejecutar
             task_args]
@@ -117,7 +117,7 @@ export class OdooJsonRpcService {
           args:  [
             "backup",     // Nombre de la base de datos
             uid,                          // ID del usuario que ejecuta la acción (Admin usualmente es 2)
-            "admin",               // Contraseña del usuario
+            "control_almacen",               // Contraseña del usuario
             model,        // Nombre del modelo (por ejemplo, 'res.partner')
             "unlink",                    // Método a ejecutar
             idUnlik]

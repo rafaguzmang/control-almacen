@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { OdooJsonRpcService } from '../services/inventario.service';
 import { DatosService } from '../services/datos.service';
-import { interval, Subscription, switchMap } from 'rxjs';
+import { interval, map, Subscription, switchMap } from 'rxjs';
 import internal from 'stream';
+import e from 'express';
 
 @Component({
   selector: 'app-consumibles',
@@ -23,8 +24,18 @@ export class ConsumiblesComponent implements OnInit {
   }
   
   stockControl(event:Event) {
-    const element = Number((event.target as HTMLInputElement).value)
-    console.log('element',element);
+    const cantidad = Number((event.target as HTMLInputElement).value)
+    let codigo = Number((event.target as HTMLInputElement).closest('tr')?.children[0].textContent);
+    // console.log('Código',codigo,element)
+    this.odooConsumibles.authenticate().pipe(
+      switchMap((uid)=>this.odooConsumibles.read(uid,[['id','=',codigo]],'dtm.consumibles',['id','cantidad','minimo','maximo'],1).pipe(
+        map(result=>{
+          console.log('resultado',uid,result);
+          this.odooConsumibles.update(uid,codigo,'dtm.consumibles',{'cantidad':cantidad}).subscribe(res=>console.log(res))
+        })
+      )
+      ),
+    ).subscribe(uid=>{})
   }
 
   minimoBtn() {
@@ -120,37 +131,39 @@ export class ConsumiblesComponent implements OnInit {
     console.log(recibe)
     datos={'codigo':codigo,'nombre':nombre,'cantidad':cantidad,'entregado':parseInt(entregado.value),'recibe':recibe.options[recibe.selectedIndex].text,'notas':notas.value}
     console.log(datos)
-    this.odooConsumibles.authenticate().subscribe(uid=>{
-      this.odooConsumibles.create(uid,'dtm.diseno.consumibles',
-        {
-          'fecha':new Date(),
-          'codigo':datos.codigo,
-          'nombre':datos.nombre,
-          'cantidad':datos.cantidad,
-          'entregado':datos.entregado,
-          'recibe':datos.recibe,
-          'notas':datos.notas}).subscribe(result=>{console.log(result)
-          })
-      this.odooConsumibles.read(uid,[['id','=',datos.codigo]],'dtm.diseno.almacen',['cantidad'],1).subscribe(cantidad => {
-        let nCantidad = cantidad[0].cantidad - datos.entregado
-        this.odooConsumibles.update(uid,datos.codigo,'dtm.diseno.almacen',
-          {'cantidad':nCantidad<0?0:nCantidad,
-            'disponible':0
-           }).subscribe(result=>{console.log(result)})
-           this.fetchConsumibles();
-      })
+    // this.odooConsumibles.authenticate().subscribe(uid=>{
+    //   this.odooConsumibles.create(uid,'dtm.diseno.consumibles',
+    //     {
+    //       'fecha':new Date(),
+    //       'codigo':datos.codigo,
+    //       'nombre':datos.nombre,
+    //       'cantidad':datos.cantidad,
+    //       'entregado':datos.entregado,
+    //       'recibe':datos.recibe,
+    //       'notas':datos.notas}).subscribe(result=>{console.log(result)
+    //       })
+    //   this.odooConsumibles.read(uid,[['id','=',datos.codigo]],'dtm.diseno.almacen',['cantidad'],1).subscribe(cantidad => {
+    //     let nCantidad = cantidad[0].cantidad - datos.entregado
+    //     this.odooConsumibles.update(uid,datos.codigo,'dtm.diseno.almacen',
+    //       {'cantidad':nCantidad<0?0:nCantidad,
+    //         'disponible':0
+    //        }).subscribe(result=>{console.log(result)})
+    //        this.fetchConsumibles();
+    //   })
      
-    })
+    // })
 
   }
 
   fetchConsumibles(): void {
     this.odooConsumibles.authenticate().pipe(
       switchMap((uid)=>
-      this.odooConsumibles.read(uid,[['caracteristicas','=','consumible']],'dtm.diseno.almacen',
-        ['id','nombre','cantidad','minimo','localizacion','medida'],this.limit))
+      this.odooConsumibles.read(uid,[['id','!=','0']],'dtm.consumibles',
+        ['id','nombre','cantidad','minimo','maximo',],this.limit)
+      ),      
     ).subscribe({
       next:(datos) => {
+        console.log(datos);
         const sortedArray = datos.sort((a: {cantidad:number},b:{cantidad:number})=> a.cantidad - b.cantidad);
         this.odooData.setConsumibles(sortedArray);
         this.consumibles = this.odooData.getConsumibles();

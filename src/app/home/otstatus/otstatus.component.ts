@@ -46,6 +46,7 @@ export class OtstatusComponent implements OnInit{
           
       ),
       map(result=>{
+        console.log('result',result);
         proceso=result;        
       }),// se obtinen las ordenes de diseño
       switchMap(() => 
@@ -60,7 +61,9 @@ export class OtstatusComponent implements OnInit{
       map(result=>{ //se hace una lista con número de orden id y estatus
         // console.log(result);    
         result.forEach((orden:any)=>{
+          // console.log(proceso);
           let encontrado = proceso.find(row => Number(row.ot_number) == orden.ot_number && row.revision_ot == orden.revision_ot);
+          // console.log('encontrado',encontrado);
           if(encontrado){
             ordenes.push({'id':orden.id,'orden':orden.ot_number,'status':encontrado.status})            
           }
