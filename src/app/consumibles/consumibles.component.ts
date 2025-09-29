@@ -131,6 +131,7 @@ export class ConsumiblesComponent implements OnInit {
     console.log(recibe)
     datos={'codigo':codigo,'nombre':nombre,'cantidad':cantidad,'entregado':parseInt(entregado.value),'recibe':recibe.options[recibe.selectedIndex].text,'notas':notas.value}
     console.log(datos)
+    
     // this.odooConsumibles.authenticate().subscribe(uid=>{
     //   this.odooConsumibles.create(uid,'dtm.diseno.consumibles',
     //     {

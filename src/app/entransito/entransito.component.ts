@@ -201,11 +201,12 @@ export class EntransitoComponent implements OnInit{
               const id = result[0].id;
               console.log('result[0].materials_availabe',result[0].materials_availabe);
               let nuevoDisponible = result[0].materials_availabe + cantidad<=result[0].materials_cuantity? result[0].materials_availabe + cantidad:result[0].materials_cuantity;
-              let nuevoRequerido = cantidad_solicitada - cantidad<0? cantidad_solicitada - cantidad:0;
-
+              nuevoDisponible = nuevoDisponible<0?0:nuevoDisponible;
+              let nuevoRequerido = result[0].materials_cuantity - nuevoDisponible>0? result[0].materials_cuantity - nuevoDisponible:0;
+              nuevoRequerido = nuevoRequerido<0?0:nuevoRequerido;
               return this.odooConsulta.update(uid, id, 'dtm.materials.line', {
-                'materials_required': nuevoDisponible<=0?cantidad_solicitada:nuevoRequerido,
-                'materials_availabe': nuevoDisponible>0?nuevoDisponible:0,
+                'materials_required': nuevoRequerido,
+                'materials_availabe': nuevoDisponible,
                 'revision':true,
               }).pipe(
                 switchMap(()=> this.odooConsulta.read(uid,[['materials_list','=',codigo],['entregado','!=',true]],'dtm.materials.line',['id','materials_list','materials_availabe','entregado','model_id'],0).pipe(
