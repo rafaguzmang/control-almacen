@@ -201,7 +201,7 @@ export class HomeComponent implements OnInit {
 
   fetchAll(){
     this.odooservice.authenticate().subscribe((uid:number)=>{
-      this.odooservice.read(uid,[['almacen_rev','=','true'],['firma','!=',null],['firma_ventas','!=',null]],'dtm.odt',['id','ot_number','revision_ot','disenador','date_disign_finish'],0).subscribe((result:any)=>{
+      this.odooservice.read(uid,[['almacen_rev','=','true'],['firma','!=',null],['firma_ventas','!=',null]],'dtm.odt',['id','ot_number','revision_ot','disenador','firma_date'],0).subscribe((result:any)=>{
         console.log(result);
         this.datosservice.setOrdenes(result);
         this.tabla = this.datosservice.getOrdenes();
