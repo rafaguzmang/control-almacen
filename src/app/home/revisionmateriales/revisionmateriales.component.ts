@@ -31,55 +31,58 @@ export class RevisionmaterialesComponent implements OnInit {
       switchMap(getuid => 
          this.odooconect.read(
           getuid,
-          [['id','!=',0]],
-          'dtm.proceso',
-          ['id','ot_number','revision_ot','status','materials_ids'],
+          // [['firma_ventas','=',true],['firma_ingenieria','=',true]],
+          ['|',['firma_ventas','!=',false],['firma_ingenieria','!=',false]],
+          'dtm.odt',
+          ['id','ot_number','revision_ot','materials_ids'],
           0).pipe(
             map(result=>{
               uid = getuid;
-              procesos_list = [].concat(...result.map((row:any) => row.materials_ids));               
+              result.forEach((row:any) =>{ 
+                row.materials_ids.forEach((orden:any)=>materialesList.push(orden));
+              })
             })
           )          
       ),  
-      switchMap(()=>this.odooconect.read(uid,[['id','!=',0]],'dtm.materiales',['id','cantidad','apartado','disponible'],0).pipe(
-          map(materiales => {
-            materialesList = materiales;
+      switchMap(()=>this.odooconect.read(uid,[['id','in',materialesList],['materials_required','!=',0]],'dtm.materials.line',['id','materials_list'],0).pipe(
+          map(materiales => {  
+            materiales.forEach((item:any)=> console.log(item))
           })
        
         )
       ),
-      switchMap(() => this.odooconect.read(uid,[
-        ['id','in',procesos_list],['entregado','!=',true],['almacen','!=',true],['revision','!=',true],['materials_cuantity','!=',0]
-        ],'dtm.materials.line',['id','materials_list','materials_required','model_id','materials_cuantity'],0).pipe(
-        map(result=>{
-          let lista_materiales:any[] = [];
-          result.forEach((item:any)=>{
-            lista_materiales.push({
-              'id':item.id,
-              'codigo':item.materials_list[0],
-              'material':String(item.materials_list[1]).slice(String(item.materials_list[0]).length + 1,String(item.materials_list[1]).length),
-              'cantidad':item.materials_cuantity,
-              'requerido':item.materials_required
-            })
-          })
-          let repetidos_list:any = {};
-          lista_materiales.forEach((item:any) =>{
-            if(repetidos_list[item.codigo]){
-              repetidos_list[item.codigo] += item.cantidad;
-            }else{
-              repetidos_list[item.codigo] = item.cantidad;
-            }
-          })
-          let setList = [ ...new Map(lista_materiales.map(item=>[item.codigo,item])).values()]
-          setList.forEach((item:any)=>{            
-            if(repetidos_list[String(item.codigo)]){
-              item.cantidad = repetidos_list[item.codigo];
-            }
-          })
-          this.tabla = setList.sort((item1,item2) => item1.codigo - item2.codigo);
-        })
-        )
-      ),     
+      // switchMap(() => this.odooconect.read(uid,[
+      //   ['id','in',procesos_list],['entregado','!=',true],['almacen','!=',true],['revision','!=',true],['materials_cuantity','!=',0]
+      //   ],'dtm.materials.line',['id','materials_list','materials_required','model_id','materials_cuantity'],0).pipe(
+      //   map(result=>{
+      //     let lista_materiales:any[] = [];
+      //     result.forEach((item:any)=>{
+      //       lista_materiales.push({
+      //         'id':item.id,
+      //         'codigo':item.materials_list[0],
+      //         'material':String(item.materials_list[1]).slice(String(item.materials_list[0]).length + 1,String(item.materials_list[1]).length),
+      //         'cantidad':item.materials_cuantity,
+      //         'requerido':item.materials_required
+      //       })
+      //     })
+      //     let repetidos_list:any = {};
+      //     lista_materiales.forEach((item:any) =>{
+      //       if(repetidos_list[item.codigo]){
+      //         repetidos_list[item.codigo] += item.cantidad;
+      //       }else{
+      //         repetidos_list[item.codigo] = item.cantidad;
+      //       }
+      //     })
+      //     let setList = [ ...new Map(lista_materiales.map(item=>[item.codigo,item])).values()]
+      //     setList.forEach((item:any)=>{            
+      //       if(repetidos_list[String(item.codigo)]){
+      //         item.cantidad = repetidos_list[item.codigo];
+      //       }
+      //     })
+      //     this.tabla = setList.sort((item1,item2) => item1.codigo - item2.codigo);
+      //   })
+      //   )
+      // ),     
 
     ).subscribe(()=>console.log('listo'))  
   }

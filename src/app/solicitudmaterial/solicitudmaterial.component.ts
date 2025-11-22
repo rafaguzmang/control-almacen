@@ -434,11 +434,10 @@ export class SolicitudmaterialComponent implements OnInit{
       catchError(error => {
         console.error('Error en la conexión con Odoo:', error);
         return of([]); 
-      })
-      
+      })      
     ).subscribe((result:any) => {
       console.log(result);
-      // Pasa la información a la tabla correspondiente en un service  
+      // Pasa la información a la tabla correspondiente en un service        
       this.dataMat.setMaterial(result);
       // Carga la tabla local con la información desde el service
       this.material = this.dataMat.getMaterial();

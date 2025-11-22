@@ -58,7 +58,7 @@ export class HomeComponent implements OnInit {
     let orden_id:any[]=[];
     let compras_realizado:any[] = [];
     let servicios_id:any[]=[];
-    console.log(id,version);
+    // console.log(id,version);
     this.odooservice.authenticate().pipe(
       switchMap(uidR => this.odooservice.read(uidR,
         [
@@ -85,7 +85,7 @@ export class HomeComponent implements OnInit {
       ), // Busca si hay items ya comprado de esta orden para no volverlos a pedir
       switchMap(()=> this.odooservice.read(uid,[['orden_trabajo','=',String(id)]],'dtm.compras.realizado',['id','codigo'],0).pipe(
           map(result => {
-            console.log('compras.realizado',result);
+            // console.log('compras.realizado',result);
             compras_realizado = result;
           })
         )
@@ -115,7 +115,7 @@ export class HomeComponent implements OnInit {
           0
         ).pipe(
           map((result:any) => {
-            console.log('result',result);
+            // console.log('result',result);
             // Hace un filtro de los materiales que no esten entregados, que no esten en compras o revisados por almacén y que requerido sea mayor a 0
             result = result.filter((iterator:any) => iterator.almacen == true &&  iterator.entregado != true && iterator.materials_required > 0 && iterator.revision != true );  
             // Quita elementos con medidas no completas  iterator.materials_list[1].match("Lámina") && iterator.materials_list[1].match("Perfil") && iterator.materials_list[1].match("120.0 x 48.0") || iterator.materials_list[1].match("96.0 x 48.0") || iterator.materials_list[1].match("96.0 x 36.0") || iterator.materials_list[1].match(",236.0")
@@ -146,7 +146,7 @@ export class HomeComponent implements OnInit {
 
             console.log("Para compras",result);
             result.forEach((item:any) =>  {
-              console.log(id,version,disenador,item.materials_list[0],item.materials_list[1].slice(item.materials_list[0].toString().length, item.materials_list[1].length).trimStart(),item.materials_required,tipo_orden,orden_id[0].firma_ingenieria?true:false)
+              // console.log(id,version,disenador,item.materials_list[0],item.materials_list[1].slice(item.materials_list[0].toString().length, item.materials_list[1].length).trimStart(),item.materials_required,tipo_orden,orden_id[0].firma_ingenieria?true:false)
               this.odooservice.create(
                 uid,
                 'dtm.compras.requerido',
@@ -202,7 +202,7 @@ export class HomeComponent implements OnInit {
   fetchAll(){
     this.odooservice.authenticate().subscribe((uid:number)=>{
       this.odooservice.read(uid,[['almacen_rev','=','true'],['firma','!=',null],['firma_ventas','!=',null]],'dtm.odt',['id','ot_number','revision_ot','disenador','firma_date'],0).subscribe((result:any)=>{
-        console.log(result);
+        // console.log(result);
         this.datosservice.setOrdenes(result);
         this.tabla = this.datosservice.getOrdenes();
       })

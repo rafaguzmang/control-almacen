@@ -159,7 +159,7 @@ export class EntransitoComponent implements OnInit{
         ),
       ),      
       // se lee COMPRAS REALIZADO para cambiar su status a comprado
-      switchMap(() =>         
+      switchMap(() =>  
         this.odooConsulta.read(uid,
           [
             ['orden_trabajo','=',String(orden)],
@@ -179,12 +179,12 @@ export class EntransitoComponent implements OnInit{
                 console.log('result[0].id',result[0].id);
                 encontrado = true;
                 this.odooConsulta.update(uid,
-                result[0].id,
-                'dtm.compras.realizado',
-                {
-                  'cantidad_almacen':cantidad_real + cantidad>0?cantidad_real + cantidad:0,
-                  'comprado':(cantidad_real + cantidad>cantidad_solicitada?cantidad_solicitada:cantidad_real + cantidad) == cantidad_solicitada?'Recibido':'Parcial',
-                }).subscribe()            
+                  result[0].id,
+                  'dtm.compras.realizado',
+                  {
+                    'cantidad_almacen':cantidad_real + cantidad>0?cantidad_real + cantidad:0,
+                    'comprado':(cantidad_real + cantidad>cantidad_solicitada?cantidad_solicitada:cantidad_real + cantidad) == cantidad_solicitada?'Recibido':'Parcial',
+                  }).subscribe()            
               }else{
                 alert("Item no encontrado en Compras Realizadas");
                 encontrado = false;
